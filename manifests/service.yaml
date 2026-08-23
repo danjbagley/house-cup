@@ -4,5 +4,6 @@ metadata:
   name: house-cup
   namespace: house-cup
 spec:
+  type: LoadBalancer
   selector: { app: house-cup }
   ports: [{ port: 80, targetPort: 8080 }]

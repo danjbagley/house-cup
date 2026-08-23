@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: git@github.com:danjbagley/house-cup.git   # <-- match the repoURL form your other apps use
     targetRevision: HEAD
-    path: main                        # points AT the kustomization.yaml dir
+    path: manifests                        # points AT the kustomization.yaml dir
   destination:
     server: https://kubernetes.default.svc
     namespace: house-cup

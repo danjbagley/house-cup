@@ -5,5 +5,4 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
-  - ingress.yaml
   - backup-cronjob.yaml
