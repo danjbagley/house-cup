@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: house-cup
+  namespace: house-cup
+spec:
+  replicas: 1                 # HARD REQUIREMENT — state is a local file; never scale this
+  strategy:
+    type: Recreate            # RWO volume: old pod must release before new one mounts
+  selector:
+    matchLabels: { app: house-cup }
+  template:
+    metadata:
+      labels: { app: house-cup }
+    spec:
+      # Soft preference for devious (same style as pg-main): NVMe-backed
+      # hostpath, and keeps another stateful workload off pepper's V300.
+      # Only decisive on FIRST schedule — after that the hostpath PV pins it.
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values: [devious]
+      containers:
+        - name: house-cup
+          image: djbagley/house-cup:1.0.0   # <-- EDIT to your actual registry path
+          ports: [{ containerPort: 8080 }]
+          env:
+            - { name: PORT, value: "8080" }
+            - { name: DATA_DIR, value: "/data" }
+          volumeMounts:
+            - { name: state, mountPath: /data }
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 2
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          resources:
+            requests: { cpu: 25m, memory: 48Mi }
+            limits: { memory: 128Mi }
+      imagePullSecrets:
+        - name: house-cup-regcred
+      volumes:
+        - name: state
+          persistentVolumeClaim: { claimName: house-cup-state }

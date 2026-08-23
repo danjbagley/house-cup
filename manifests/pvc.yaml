@@ -1,0 +1,15 @@
+# State lives on local node disk (house principle: app state off NFS).
+# NOTE: hostpath PVs are node-affine — once bound, the pod (and the backup
+# CronJob, which mounts the same PVC) will always schedule on that node.
+# If that node dies, recovery = redeploy + in-app Restore from backup.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: house-cup-state
+  namespace: house-cup
+spec:
+  storageClassName: microk8s-hostpath   # explicit, not default-by-accident
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi

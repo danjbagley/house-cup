@@ -1,0 +1,25 @@
+# The House Cup — single-pod stateful app, plain kustomize directory.
+# REMINDER: until the root app-of-apps exists, this Application must be
+# applied by hand once:  kubectl apply -f house-cup/apps/house-cup.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: house-cup
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:danjbagley/tooling.git   # <-- match the repoURL form your other apps use
+    targetRevision: HEAD
+    path: house-cup/manifests                        # points AT the kustomization.yaml dir
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: house-cup
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

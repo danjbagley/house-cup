@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: house-cup
+  namespace: house-cup
+spec:
+  selector: { app: house-cup }
+  ports: [{ port: 80, targetPort: 8080 }]

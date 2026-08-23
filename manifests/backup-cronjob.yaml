@@ -1,0 +1,54 @@
+# Nightly copy of /data/state.json into MinIO. Because MinIO's persistence
+# is on nfs-synology, every backup automatically lands on the DS218+ —
+# same pipeline shape as the CNPG barman backups, zero human habit required.
+#
+# Scheduling note: the Job mounts the same RWO hostpath PVC as the app.
+# hostpath PVs carry node affinity, so the scheduler automatically places
+# this pod on the same node as the app pod (RWO permits co-located pods).
+#
+# Secret: 'minio-root-creds' is namespace-scoped and lives in 'minio'.
+# Copy it into 'house-cup' out-of-band — add to bootstrap/secrets.sh:
+#   kubectl get secret minio-root-creds -n minio -o yaml \
+#     | sed 's/namespace: minio/namespace: house-cup/' | kubectl apply -f -
+# (Or better: create a dedicated MinIO user with a policy scoped to this bucket.)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: house-cup-backup
+  namespace: house-cup
+spec:
+  schedule: "15 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: backup
+              image: minio/mc:latest        # <-- pin to a RELEASE.* tag once verified
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  if [ ! -s /data/state.json ]; then
+                    echo "no state yet, nothing to back up"; exit 0
+                  fi
+                  mc alias set minio http://minio.minio.svc.cluster.local:9000 "$MINIO_USER" "$MINIO_PASS"
+                  mc mb --ignore-existing minio/house-cup-backups
+                  mc cp /data/state.json "minio/house-cup-backups/state-$(date +%F).json"
+                  # keep ~6 months; the blob is tiny, retention is about tidiness
+                  mc rm --recursive --force --older-than 180d minio/house-cup-backups/ || true
+              env:
+                - name: MINIO_USER
+                  valueFrom: { secretKeyRef: { name: minio-root-creds, key: rootUser } }
+                - name: MINIO_PASS
+                  valueFrom: { secretKeyRef: { name: minio-root-creds, key: rootPassword } }
+              volumeMounts:
+                - { name: state, mountPath: /data, readOnly: true }
+          volumes:
+            - name: state
+              persistentVolumeClaim: { claimName: house-cup-state }

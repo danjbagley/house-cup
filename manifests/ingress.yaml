@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: house-cup
+  namespace: house-cup
+  annotations:
+    # CRITICAL: ingress-nginx defaults to a 1MB request body limit. The app
+    # PUTs the ENTIRE state blob (up to 5MB) on every save — without this,
+    # the board works on day one and starts returning 413s the day the
+    # JSON crosses 1MB. Sized to match server.js's 5MB cap plus headroom.
+    nginx.ingress.kubernetes.io/proxy-body-size: "6m"
+    cert-manager.io/cluster-issuer: letsencrypt-prod    # <-- verify: kubectl get clusterissuer
+spec:
+  ingressClassName: nginx                               # <-- verify: kubectl get ingressclass
+  rules:
+    - host: housecup.statisticalnetworks.com            # <-- confirm hostname choice
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: house-cup, port: { number: 80 } }
+  tls:
+    - hosts: [housecup.statisticalnetworks.com]
+      secretName: house-cup-tls
