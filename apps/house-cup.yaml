@@ -11,9 +11,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:danjbagley/tooling.git   # <-- match the repoURL form your other apps use
+    repoURL: git@github.com:danjbagley/house-cup.git   # <-- match the repoURL form your other apps use
     targetRevision: HEAD
-    path: house-cup/manifests                        # points AT the kustomization.yaml dir
+    path: main                        # points AT the kustomization.yaml dir
   destination:
     server: https://kubernetes.default.svc
     namespace: house-cup
