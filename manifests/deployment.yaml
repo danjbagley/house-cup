@@ -28,6 +28,7 @@ spec:
       containers:
         - name: house-cup
           image: djbagley/house-cup:1.0.0   # <-- EDIT to your actual registry path
+          imagePullPolicy: Always
           ports: [{ containerPort: 8080 }]
           env:
             - { name: PORT, value: "8080" }
@@ -44,6 +45,7 @@ spec:
           resources:
             requests: { cpu: 25m, memory: 48Mi }
             limits: { memory: 128Mi }
+
       imagePullSecrets:
         - name: house-cup-regcred
       volumes:
