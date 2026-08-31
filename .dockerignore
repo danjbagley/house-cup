@@ -1,0 +1,12 @@
+# Only app/ is copied; keep the rest out of the build context.
+.git
+.gitignore
+.idea
+*.iml
+argocd
+manifests
+apps
+docs
+*.md
+Dockerfile
+.dockerignore
