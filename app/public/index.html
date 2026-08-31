@@ -14,6 +14,10 @@
   --parch:#EFE3C8; --parch-2:#DFCFA9; --parch-3:#C9B489;
   --ink:#2A2015; --ink-soft:#6E5D42;
   --gryf:#7C1420; --brass:#B9924F; --wax:#8E1B22;
+  /* Starbucks green, two of them: #00704A is the brand green and clears AA on
+     the parchment (4.83) but only manages 3.02 on the dark hall — too little
+     for 9px letter-spaced type. The lighter accent reaches 6.00 there. */
+  --sbux:#00704A; --sbux-lift:#00A862;
   --title:'Cinzel Decorative',Georgia,serif;
   --display:'Cinzel',Georgia,'Times New Roman',serif;
   --body:'EB Garamond',Georgia,serif;
@@ -48,6 +52,7 @@ input,select{font-family:var(--body);font-size:16px}
 .hall-in{position:relative;z-index:2}
 .eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.28em;text-transform:uppercase;
   color:var(--candle-dim);margin:0 0 7px;text-align:center}
+.eyebrow.brand{color:var(--sbux-lift)}
 h1{font-family:var(--title);font-weight:700;font-size:22px;line-height:1.15;margin:0;
   color:var(--candle);text-align:center;text-shadow:0 0 22px rgba(240,196,90,.35)}
 .rule{display:flex;align-items:center;justify-content:center;gap:9px;margin:8px 0 2px;color:var(--candle-dim);font-size:9px}
@@ -138,6 +143,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 .seg button.on{background:var(--ink);color:var(--parch)}
 .tgt{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--parch-3);cursor:pointer}
 .tgt:first-of-type{border-top:none}
+.tgt:focus-visible{outline:2px solid var(--candle-dim);outline-offset:2px}
 .tgt .box{width:26px;height:26px;flex:0 0 26px;border:1.5px solid var(--parch-3);border-radius:3px;
   background:#FFFCF4;display:flex;align-items:center;justify-content:center;font-size:16px;color:transparent}
 .tgt.on .box{background:#1E5C3A;border-color:#1E5C3A;color:#fff}
@@ -267,7 +273,7 @@ nav button[aria-current=true]{color:var(--candle);border-top-color:var(--candle)
 <div class="hall">
   <div id="sky"></div><div id="candles"></div>
   <div class="hall-in">
-    <p class="eyebrow" id="eyebrow">The Standings</p>
+    <p class="eyebrow brand" id="eyebrow">Starbucks</p>
     <h1>The House Cup</h1>
     <div class="rule">✦</div>
     <p class="storeline"><input id="storeName" type="text" maxlength="22" placeholder="your store" aria-label="Store name"> · <span id="cupDates">—</span></p>
@@ -292,7 +298,12 @@ nav button[aria-current=true]{color:var(--candle);border-top-color:var(--candle)
 window.storage={
   async get(key,shared){
     const r=await fetch('api/state',{cache:'no-store'});
-    if(r.status!==200)throw new Error('no state yet');
+    /* 204 means the server is fine and the board is genuinely empty; anything
+       else (or a thrown fetch) means we could not read it. Telling those apart
+       is what lets save() refuse to write over a board it never managed to
+       read, without blocking a real first run. */
+    if(r.status===204){const e=new Error('fresh board');e.fresh=true;throw e}
+    if(r.status!==200)throw new Error('server said '+r.status);
     const v=await r.text();
     if(!v)throw new Error('empty state');
     return {value:v,key:key,shared:!!shared}},
@@ -313,11 +324,21 @@ const ALL_HOUSES=[
   {id:'Pukwudgie',    color:'#8C2B52',gem:'#EE7BA4',alt:'#F7D9E4',beast:'badger'}
 ];
 let HOUSES=ALL_HOUSES.slice(0,4);
+/* 5: house ids are display names ("Horned Serpent"); an SVG url(#..) cannot
+   contain whitespace, so ids that reach the DOM go through slug() */
+function slug(s){return String(s).replace(/[^A-Za-z0-9_-]+/g,'-')}
+/* 6: a house that no longer exists (houseCount lowered) still owns historical
+   entries. Map it to its successor at read time so the points stay visible,
+   and reversibly, so raising the count again restores them. */
+function houseSlot(id){
+  if(HOUSES.some(h=>h.id===id))return id;
+  const j=ALL_HOUSES.findIndex(h=>h.id===id);
+  return j<0?HOUSES[0].id:HOUSES[j%HOUSES.length].id}
 function syncHouses(){
   const n=Math.min(Math.max(S.houseCount||4,2),8);
   HOUSES=ALL_HOUSES.slice(0,n);
   const ids=HOUSES.map(h=>h.id);
-  S.roster.forEach((p,i)=>{if(!ids.includes(p.house))p.house=ids[i%n]});
+  S.roster.forEach(p=>{if(!ids.includes(p.house))p.house=houseSlot(p.house)});
   S.managers.forEach(m=>{if(m.house&&!ids.includes(m.house))m.house=''});
 }
 const DEFAULT_TARGETS=[
@@ -334,6 +355,19 @@ const DEFAULT_EXTRAS=[
   {id:'regular',pts:5,label:'Went out of their way for a regular'}
 ];
 function extrasList(){return (S&&Array.isArray(S.extras))?S.extras:DEFAULT_EXTRAS}
+/* Points taken. Same shape as the deeds list and editable the same way, so a
+   store sets its own — these five are a neutral starting point, not a
+   recommendation. Fixed amounts for the same reason the deeds are fixed: four
+   managers have to be consistent, and a discretionary deduction reads as
+   someone having it in for you. Deliberately no free-amount option. */
+const DEFAULT_MISDEEDS=[
+  {id:'noshow',  pts:15,label:'Missed a shift without letting anyone know'},
+  {id:'hygiene', pts:10,label:'Skipped a food safety or hygiene step'},
+  {id:'late',    pts:5, label:'Late for a shift without letting anyone know'},
+  {id:'handover',pts:5, label:'Left the bar for someone else to sort out'},
+  {id:'standard',pts:5, label:'Drinks going out off-standard after coaching'}
+];
+function misdeedsList(){return (S&&Array.isArray(S.misdeeds))?S.misdeeds:DEFAULT_MISDEEDS}
 const KEY='housecup:state';
 const SEED_MGRS=['Lukrecija Paresciute','Danny Rising','Kirsty Bryant','Ryan Thurlow','Erin Kiely','Jasmin Burton']
   .map(n=>({id:'m'+n.split(' ')[0].toLowerCase(),name:n,house:'',
@@ -344,10 +378,12 @@ const SEED_ROSTER=['Anna Plackowska','Daisy Glister','Daniel Hook','Effienia Ave
   'Olivia Reed','Pamela Watson-Smith','Rebecca Fiske','Reggie Everitt','Samuel Robertson','Travis Fulcher']
   .map((n,i)=>({id:'p'+n.split(' ')[0].toLowerCase(),name:n,
     house:['Gryffindor','Slytherin','Ravenclaw','Hufflepuff'][i%4]}));
-const DEFAULT={store:'',ptsSmg:10,storeHitPoints:10,perCapita:true,houseCount:4,maxExtraPartner:2,maxExtraHouse:6,extras:DEFAULT_EXTRAS,targets:DEFAULT_TARGETS,posterPin:'1234',smgCount:0,smgTarget:100,smgReward:50,
+const DEFAULT={store:'',ptsSmg:10,storeHitPoints:10,perCapita:true,houseCount:4,maxExtraPartner:2,maxExtraHouse:6,extras:DEFAULT_EXTRAS,targets:DEFAULT_TARGETS,
+  misdeeds:DEFAULT_MISDEEDS,maxDeductPartner:1,maxDeductHouse:2,posterPin:'1234',smgCount:0,smgTarget:100,smgReward:50,
   roster:[],entries:[],days:[],archive:[],managers:[],deleted:[],cupStart:todayISO(),rotationDate:''};
 let S=null,tab='hall',me=null,certWeek=null;
 let dayDraft={date:todayISO(),shift:(new Date().getHours()<15?'am':'pm'),crew:[]};
+let mdDraft={name:'',mdId:'',detail:'',date:todayISO()};
 function shiftName(s){return s==='am'?'Morning':s==='pm'?'Afternoon':'All day'}
 
 function todayISO(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
@@ -375,10 +411,13 @@ function freshState(){
   return JSON.parse(JSON.stringify(Object.assign({},DEFAULT,
     {managers:SEED_MGRS,roster:SEED_ROSTER,cupStart:todayISO()})))}
 async function load(){
-  try{const r=await window.storage.get(KEY,true);S=Object.assign(freshState(),JSON.parse(r.value))}
-  catch(e){S=freshState()}
+  const r=await readState(3);
+  if(r.ok){S=Object.assign(freshState(),r.value);lastRaw=r.raw;loadedOk=true}
+  else if(r.fresh){S=freshState();loadedOk=true}   /* server fine, board empty */
+  else{S=freshState();loadFailed=true}             /* could not read — block saves */
   if(!S.days)S.days=[];
   if(!Array.isArray(S.extras))S.extras=JSON.parse(JSON.stringify(DEFAULT_EXTRAS));
+  if(!Array.isArray(S.misdeeds))S.misdeeds=JSON.parse(JSON.stringify(DEFAULT_MISDEEDS));
   if(!Array.isArray(S.targets))S.targets=JSON.parse(JSON.stringify(DEFAULT_TARGETS));
   if(!S.storeHitPoints)S.storeHitPoints=10;
   if(!S.managers)S.managers=[];
@@ -404,9 +443,32 @@ async function load(){
   sky();render()
 }
 let saving=false,lastRaw=null,roseOnce=false;
+/* loadedOk: a read has succeeded, so we know what is on the board and it is
+   safe to write. Until then save() refuses — otherwise a failed read at load
+   followed by one at save writes an empty board over a real one. */
+let loadedOk=false,loadFailed=false,pending=false,pendingReplace=false;
+const TOMB_CAP=5000;
 function tomb(ids){
-  S.deleted=(S.deleted||[]).concat(ids.filter(Boolean));
-  if(S.deleted.length>800)S.deleted=S.deleted.slice(-800)}
+  /* was capped at 800 and kept the newest — but resetAll and closeCup concat
+     entries first, so entries were what fell off, letting a phone that had
+     been offline resurrect a finished term */
+  const seen={},out=[];
+  (S.deleted||[]).concat(ids.filter(Boolean)).forEach(id=>{if(!seen[id]){seen[id]=1;out.push(id)}});
+  S.deleted=out.length>TOMB_CAP?out.slice(-TOMB_CAP):out}
+/* ids on the remote board but absent from `loc` — what a replacing write
+   (restore) must tombstone so other clients do not merge them back */
+function absentIds(rem,loc){
+  const out=[];
+  ['entries','days','roster','managers','archive'].forEach(k=>{
+    const have={};(loc[k]||[]).forEach(x=>{if(x&&x.id)have[x.id]=1});
+    (rem[k]||[]).forEach(x=>{if(x&&x.id&&!have[x.id])out.push(x.id)})});
+  return out}
+async function readState(tries){
+  for(let i=0;i<tries;i++){
+    try{const r=await window.storage.get(KEY,true);return {ok:true,raw:r.value,value:JSON.parse(r.value)}}
+    catch(e){if(e&&e.fresh)return {ok:false,fresh:true};
+      if(i+1<tries)await new Promise(f=>setTimeout(f,300*(i+1)))}}
+  return {ok:false}}
 function mergeById(a,b,del){
   const m={};
   (b||[]).forEach(x=>{if(x&&x.id)m[x.id]=x});
@@ -416,30 +478,52 @@ function mergeState(loc,rem){
   const del=[];
   (loc.deleted||[]).concat(rem.deleted||[]).forEach(i=>{if(del.indexOf(i)<0)del.push(i)});
   const out=Object.assign({},rem,loc);
-  out.deleted=del.slice(-800);
+  out.deleted=del.slice(-TOMB_CAP);
   out.entries=mergeById(loc.entries,rem.entries,del);
   out.days=mergeById(loc.days,rem.days,del);
   out.roster=mergeById(loc.roster,rem.roster,del);
   out.managers=mergeById(loc.managers,rem.managers,del);
   out.archive=mergeById(loc.archive,rem.archive,del);
   return out}
-async function save(){
-  if(saving)return;saving=true;
+async function save(replace){
+  /* 9: a save arriving mid-save used to be dropped — it is queued now */
+  if(saving){pending=true;if(replace)pendingReplace=true;return}
+  saving=true;
   try{
-    let rem=null;
-    try{const r=await window.storage.get(KEY,true);rem=JSON.parse(r.value)}catch(e){}
-    if(rem)S=mergeState(S,rem);
+    const r=await readState(2);
+    if(r.ok){loadedOk=true;loadFailed=false;
+      /* 2: a restore must replace, not union with what is already there */
+      if(replace)tomb(absentIds(r.value,S));else S=mergeState(S,r.value)}
+    else if(r.fresh){loadedOk=true;loadFailed=false}
+    else if(!loadedOk){
+      /* 8: never read the board — writing now could erase it */
+      loadFailed=true;toast('Cannot reach the board — nothing was saved');
+      saving=false;flush();render();return}
     lastRaw=JSON.stringify(S);
     await window.storage.set(KEY,lastRaw,true);
   }catch(e){toast("The owl didn't get through")}
-  saving=false}
+  saving=false;flush()}
+function flush(){
+  if(!pending)return;
+  const r=pendingReplace;pending=false;pendingReplace=false;save(r)}
+function loadBar(){
+  if(!loadFailed)return '';
+  return `<div class="card" style="border-color:var(--candle-dim)">
+    <h2 style="margin:0 0 8px">The board did not load</h2>
+    <p class="hint">This is a connection problem, not an empty board — nothing has been lost.
+      Points already awarded simply are not showing. Reload to try again, and do not make
+      changes until they reappear.</p>
+    <button class="btn" onclick="location.reload()">Reload</button></div>`}
 async function poll(){
   if(document.hidden||saving||certWeek)return;
   try{
     const r=await window.storage.get(KEY,true);
     if(!r||r.value===lastRaw)return;
     const keep=grabShiftInputs();
-    S=mergeState(S,JSON.parse(r.value));lastRaw=JSON.stringify(S);
+    /* 4: track the raw remote string. Storing the merged local state here
+       meant lastRaw never matched the remote again, so poll re-rendered on
+       every tick for as long as there were unsaved local edits. */
+    S=mergeState(S,JSON.parse(r.value));lastRaw=r.value;
     syncHouses();render();putShiftInputs(keep);
   }catch(e){}}
 let unlocked=false;
@@ -525,9 +609,9 @@ function weekStats(start){
   const end=addDays(start,6),st={};
   HOUSES.forEach(h=>st[h.id]={id:h.id,raw:0,smg:0,extra:0,tgt:0,members:0,pts:0});
   S.roster.forEach(p=>{if(st[p.house])st[p.house].members++});
-  S.entries.forEach(e=>{if(e.date<start||e.date>end)return;const x=st[e.house];if(!x)return;
+  S.entries.forEach(e=>{if(e.date<start||e.date>end)return;const x=st[houseSlot(e.house)];if(!x)return;
     x.raw+=entryPts(e);x.smg+=e.smg||0;x.extra+=e.extra||0});
-  S.days.forEach(d=>{if(d.date<start||d.date>end)return;const x=st[d.house];if(!x)return;
+  S.days.forEach(d=>{if(d.date<start||d.date>end)return;const x=st[houseSlot(d.house)];if(!x)return;
     x.tgt+=targetsList().filter(t=>d[t.k]).length});
   HOUSES.forEach(h=>{const x=st[h.id];
     x.pts=x.tgt*S.storeHitPoints+(S.perCapita&&x.members?Math.round(x.raw/x.members*10)/10:x.raw)});
@@ -540,12 +624,15 @@ function weeksWithData(){
 function entryPts(e){return (e.smg||0)*S.ptsSmg+(e.extra||0)+(e.tgt||0)*S.storeHitPoints}
 function surveyReached(){return (S.smgTarget||0)>0&&(S.smgCount||0)>=S.smgTarget}
 function houseStats(){
-  const wk=new Date(Date.now()-6.5*864e5).toISOString().slice(0,10),st={};
+  /* 12: was the only date computed in UTC, and measuring 6.5 days back from
+     the current instant made the window 7 or 8 days wide depending on the
+     time of day it was read. Today plus the six before it. */
+  const wk=addDays(todayISO(),-6),st={};
   HOUSES.forEach(h=>st[h.id]={id:h.id,raw:0,smg:0,extra:0,tgt:0,week:0,members:0,pts:0});
   S.roster.forEach(p=>{if(st[p.house])st[p.house].members++});
-  S.entries.forEach(e=>{const s=st[e.house];if(!s)return;
+  S.entries.forEach(e=>{const s=st[houseSlot(e.house)];if(!s)return;
     const v=entryPts(e);s.raw+=v;s.smg+=(e.smg||0);s.extra+=(e.extra||0);if(e.date>=wk)s.week+=v});
-  S.days.forEach(d=>{const s=st[d.house];if(!s)return;
+  S.days.forEach(d=>{const s=st[houseSlot(d.house)];if(!s)return;
     s.tgt+=targetsList().filter(t=>d[t.k]).length});
   const svy=surveyReached()?(S.smgReward||0):0;
   HOUSES.forEach(h=>{const s=st[h.id];
@@ -560,43 +647,45 @@ function drawGlasses(){
   const gl=document.getElementById('glasses');
   gl.style.gridTemplateColumns='repeat('+(HOUSES.length>6?4:(HOUSES.length>4?3:HOUSES.length))+',1fr)';
   gl.innerHTML=HOUSES.map((h,gi)=>{
-    const s=st[h.id];
-    let pct=Math.min(s.pts/(lead*1.3),1);
+    const s=st[h.id],q=slug(h.id);
+    /* clamped low as well as high: a house in the red would otherwise give
+       the fill rect a negative height, which is invalid SVG */
+    let pct=Math.max(0,Math.min(s.pts/(lead*1.3),1));
     if(s.pts>0)pct=Math.max(pct,.05);
     const y=232-pct*138,y0=roseOnce?y:232;
-    return `<div class="glass ${s.rank===1&&s.pts>0?'leading':''}" id="glass-${h.id}">${crest(h,21)}
+    return `<div class="glass ${s.rank===1&&s.pts>0?'leading':''}" id="glass-${q}">${crest(h,21)}
       <svg class="hg" viewBox="0 0 100 250" aria-label="${h.id}: ${n1(s.pts)} points">
       <defs>
-        <linearGradient id="brs-${h.id}" x1="0" x2="1"><stop offset="0" stop-color="#7E6130"/>
+        <linearGradient id="brs-${q}" x1="0" x2="1"><stop offset="0" stop-color="#7E6130"/>
           <stop offset=".45" stop-color="#DFC183"/><stop offset="1" stop-color="#7E6130"/></linearGradient>
-        <pattern id="gr-${h.id}" width="5" height="5" patternUnits="userSpaceOnUse">
+        <pattern id="gr-${q}" width="5" height="5" patternUnits="userSpaceOnUse">
           <rect width="5" height="5" fill="${h.color}"/>
           <circle cx="1.2" cy="1.4" r=".9" fill="${h.gem}" opacity=".95"/>
           <circle cx="3.7" cy="3.4" r=".7" fill="#fff" opacity=".4"/>
           <circle cx="3.9" cy="1" r=".5" fill="${h.gem}" opacity=".6"/></pattern>
-        <clipPath id="bulb-${h.id}"><path d="M19 15 L81 15 Q81 56 57 74 L57 84 L43 84 L43 74 Q19 56 19 15 Z"/></clipPath>
-        <clipPath id="cyl-${h.id}"><rect x="21" y="94" width="58" height="138"/></clipPath>
+        <clipPath id="bulb-${q}"><path d="M19 15 L81 15 Q81 56 57 74 L57 84 L43 84 L43 74 Q19 56 19 15 Z"/></clipPath>
+        <clipPath id="cyl-${q}"><rect x="21" y="94" width="58" height="138"/></clipPath>
       </defs>
-      <rect x="5" y="12" width="5" height="224" fill="url(#brs-${h.id})"/>
-      <rect x="90" y="12" width="5" height="224" fill="url(#brs-${h.id})"/>
+      <rect x="5" y="12" width="5" height="224" fill="url(#brs-${q})"/>
+      <rect x="90" y="12" width="5" height="224" fill="url(#brs-${q})"/>
       <rect x="12" y="2" width="76" height="11" rx="4" fill="#E8E0CE"/>
-      <rect x="12" y="10" width="76" height="4" rx="1.5" fill="url(#brs-${h.id})"/>
-      <circle cx="22" cy="7" r="3.4" fill="url(#brs-${h.id})"/><circle cx="78" cy="7" r="3.4" fill="url(#brs-${h.id})"/>
-      <g clip-path="url(#bulb-${h.id})"><rect x="19" y="15" width="62" height="70" fill="url(#gr-${h.id})"/></g>
+      <rect x="12" y="10" width="76" height="4" rx="1.5" fill="url(#brs-${q})"/>
+      <circle cx="22" cy="7" r="3.4" fill="url(#brs-${q})"/><circle cx="78" cy="7" r="3.4" fill="url(#brs-${q})"/>
+      <g clip-path="url(#bulb-${q})"><rect x="19" y="15" width="62" height="70" fill="url(#gr-${q})"/></g>
       <path d="M19 15 L81 15 Q81 56 57 74 L57 84 L43 84 L43 74 Q19 56 19 15 Z"
             fill="none" stroke="rgba(255,255,255,.34)" stroke-width="1.3"/>
-      <path d="M43 80 L26 74 L41 86 Z" fill="url(#brs-${h.id})"/>
-      <path d="M57 80 L74 74 L59 86 Z" fill="url(#brs-${h.id})"/>
+      <path d="M43 80 L26 74 L41 86 Z" fill="url(#brs-${q})"/>
+      <path d="M57 80 L74 74 L59 86 Z" fill="url(#brs-${q})"/>
       <rect x="21" y="90" width="58" height="144" rx="2" fill="rgba(255,255,255,.055)" stroke="rgba(255,255,255,.28)" stroke-width="1.2"/>
-      <g clip-path="url(#cyl-${h.id})">
+      <g clip-path="url(#cyl-${q})">
         <rect class="fill-rect" x="21" y="${y0}" width="58" height="${232-y0}" data-y="${y.toFixed(1)}"
-          style="transition-delay:${(gi*.14).toFixed(2)}s" fill="url(#gr-${h.id})"/>
+          style="transition-delay:${(gi*.14).toFixed(2)}s" fill="url(#gr-${q})"/>
         ${[[33,224,1.4],[62,214,1.1],[47,228,1.2],[70,222,1],[38,204,1.1],[57,196,1.3],[28,186,1],[66,176,1.2],[44,166,1.1],[35,146,1]]
           .filter(sp=>sp[1]>y+8).map((sp,si)=>`<circle class="spk" cx="${sp[0]}" cy="${sp[1]}" r="${sp[2]}" fill="#FFF" opacity="0"
             style="animation-delay:${(1.6+si*.7+gi*.3).toFixed(1)}s"/>`).join('')}
       </g>
-      <rect x="17" y="150" width="66" height="7" rx="2" fill="url(#brs-${h.id})" opacity=".92"/>
-      <rect x="12" y="232" width="76" height="10" rx="3" fill="url(#brs-${h.id})"/>
+      <rect x="17" y="150" width="66" height="7" rx="2" fill="url(#brs-${q})" opacity=".92"/>
+      <rect x="12" y="232" width="76" height="10" rx="3" fill="url(#brs-${q})"/>
       <rect x="16" y="241" width="68" height="6" rx="2" fill="#6E5426"/>
       <g class="pour"><rect x="47" y="86" width="6" height="10" fill="${h.gem}" opacity=".9"/>
         <rect x="48.5" y="99" width="3" height="7" fill="${h.gem}" opacity=".7"/></g>
@@ -612,7 +701,7 @@ function drawGlasses(){
       const ty=+r.dataset.y;if(!isFinite(ty))return;
       r.setAttribute('y',ty);r.setAttribute('height',232-ty)})}))}}
 function reducedMotion(){return !!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)}
-function pour(id,amt){const el=document.getElementById('glass-'+id);if(!el)return;
+function pour(id,amt){const el=document.getElementById('glass-'+slug(id));if(!el)return;
   el.classList.remove('pouring');void el.offsetWidth;el.classList.add('pouring');
   if(amt&&!reducedMotion()){
     const g=document.createElement('div');g.className='gain';g.textContent='+'+n1(amt);
@@ -741,10 +830,13 @@ function render(){
   const sn=document.getElementById('storeName');
   sn.value=S.store||'';sn.readOnly=!me;
   drawGlasses();whoBar();
-  document.getElementById('eyebrow').textContent=
-    ({hall:'The Standings',pin:'Managers',log:'Award Points',team:'The Team',mgrs:'The Managers',rotation:'The Cup'})[tab]||'The Standings';
+  const eb=document.getElementById('eyebrow');
+  eb.textContent=
+    ({hall:'Starbucks',pin:'Managers',log:'Award Points',team:'The Team',mgrs:'The Managers',rotation:'The Cup'})[tab]||'Starbucks';
+  /* the brand green is for the brand name, not every tab's label */
+  eb.className='eyebrow'+(tab==='hall'||!({pin:1,log:1,team:1,mgrs:1,rotation:1})[tab]?' brand':'');
   document.getElementById('sheet').innerHTML=
-    (({hall:viewHall,pin:viewPin,log:viewLog,team:viewTeam,mgrs:viewMgrs,rotation:viewRotation})[tab]||viewHall)();
+    loadBar()+(({hall:viewHall,pin:viewPin,log:viewLog,team:viewTeam,mgrs:viewMgrs,rotation:viewRotation})[tab]||viewHall)();
   const nav=document.getElementById('nav');
   if(me){nav.style.display='flex';
     nav.innerHTML=[['log','Award'],['team','Team'],['mgrs','Managers'],['rotation','Cup'],['hall','Poster']]
@@ -758,8 +850,12 @@ function viewHall(){
     <p class="hint">No one has been sorted into a house yet.</p>
     <button class="btn ghost" onclick="${canEdit()?"go('team')":"go('pin')"}">${canEdit()?'Set up the team':'Managers — sign in'}</button>
     ${pastChampions()}`;
+  const taken={};HOUSES.forEach(h=>taken[h.id]=0);
+  S.entries.forEach(e=>{if((e.extra||0)<0&&taken[houseSlot(e.house)]!==undefined)taken[houseSlot(e.house)]+=-(e.extra||0)});
+  const anyTaken=HOUSES.some(h=>taken[h.id]>0);
   const rows=HOUSES.map(h=>st[h.id]).sort((a,b)=>b.pts-a.pts).map(s=>{const h=house(s.id);
     return `<tr><td>${crest(h,15)}${s.id}</td><td class="num">${s.members}</td>
+    ${anyTaken?`<td class="num" style="color:var(--wax)">${taken[s.id]?'−'+taken[s.id]:'—'}</td>`:''}
     <td class="num" style="color:${h.color}">${n1(s.pts)}</td></tr>`}).join('');
   const wk=mondayOf(todayISO()),w=weekStats(wk),lead=w.list[0],lh=house(lead.id);
   const week=lead.pts?`<div class="card" style="display:flex;align-items:center;gap:12px;border-left:4px solid ${lh.color}">
@@ -795,6 +891,7 @@ function viewHall(){
     <h2 style="margin-top:26px">The term so far</h2>
     <p class="hint">Ranked on what partners earn — target points from the shifts they work, plus deeds worth extra.${S.perCapita?' Scored per partner, so a bigger house has no advantage.':''}</p>
     <div class="card"><table><tr><th>House</th><th style="text-align:right">Ptnr</th>
+      ${anyTaken?'<th style="text-align:right">Taken</th>':''}
       <th style="text-align:right">Points</th></tr>${rows}</table></div>
     <h2 style="margin-top:26px">The houses</h2>
     <div class="card">${HOUSES.map(h=>{const ppl=S.roster.filter(p=>p.house===h.id&&!p.left);
@@ -845,7 +942,9 @@ function viewLog(){
     </div>
   <h2 style="margin-top:22px">Store targets</h2>
   <p class="hint">Every target the shift hits earns ${S.storeHitPoints} points for each partner on the crew below.</p>
-  <div class="card">${targetsList().map(t=>`<div class="tgt ${dayDraft[t.k]?'on':''}" onclick="toggleT('${t.k}')">
+  <div class="card">${targetsList().map(t=>`<div class="tgt ${dayDraft[t.k]?'on':''}" role="checkbox" tabindex="0"
+    aria-checked="${dayDraft[t.k]?'true':'false'}" onclick="toggleT('${t.k}')"
+    onkeydown="kbd(event,function(){toggleT('${t.k}')})">
     <div class="box">✓</div><div class="lb"><b>${t.label}</b><i>${t.sub}</i></div></div>`).join('')}</div>
   <h2 style="margin-top:22px">Customer surveys</h2>
   <p class="hint">${S.smgCount||0} of ${S.smgTarget} this term${surveyReached()?' — target met, every house shares the reward.':'. Add responses as they arrive.'}</p>
@@ -865,13 +964,37 @@ function viewLog(){
   <p class="hint">Deeds worth extra points, at fixed amounts — at most ${S.maxExtraPartner} per partner and ${S.maxExtraHouse} per house a week.</p>
   ${groups}`:`<p class="note" style="margin:2px 0 15px">No partners chosen — targets will be tracked, but target points need a crew.</p>`}
   <button class="btn" onclick="saveShift()">Record this shift</button>
+  ${(()=>{
+    const opts=S.roster.filter(p=>!p.left).map(p=>`<option value="${esc(p.name)}" ${mdDraft.name===p.name?'selected':''}>${esc(p.name)} — ${p.house}</option>`).join('');
+    const p=S.roster.find(x=>x.name===mdDraft.name);
+    const d=misdeedsList().find(x=>x.id===mdDraft.mdId);
+    const ready=p&&d&&mdDraft.detail.trim();
+    if(!misdeedsList().length)return '';
+    return `<h2 style="margin-top:26px">Take points</h2>
+    <p class="hint">Separate from the shift above, and on purpose — this is its own press. Fixed amounts, the same for every house. A house can lose points ${S.maxDeductHouse} times a week, nobody more than ${S.maxDeductPartner}.</p>
+    <div class="card">
+      <div class="field"><label>Partner</label><select onchange="mdDraft.name=this.value;render()">
+        <option value="">Choose a partner…</option>${opts}</select></div>
+      <div class="field"><label>Date</label><input type="date" value="${mdDraft.date}" onchange="mdDraft.date=this.value"></div>
+      ${p?(()=>{const a=deductAllowance(mdDraft.date,p.house,p.name);
+        return `<p class="note" style="margin:-4px 0 13px">Left this week — ${esc(p.house)}: <strong>${a.house}</strong> of ${S.maxDeductHouse} · ${esc(shortName(p))}: <strong>${a.partner}</strong> of ${S.maxDeductPartner}</p>`})():''}
+      <div class="field"><label>What happened</label>
+        <select onchange="setMd(this.value)">
+          <option value="">Choose…</option>
+          ${misdeedsList().map(x=>`<option value="${esc(x.id)}" ${mdDraft.mdId===x.id?'selected':''}>${esc(x.label)} · −${x.pts}</option>`).join('')}
+        </select></div>
+      <div class="field"><label>Note — required, so there is a record</label>
+        <input type="text" value="${esc(mdDraft.detail)}" placeholder="e.g. Tuesday open, no message" oninput="setMdNote(this)"></div>
+      <button class="btn danger" id="mdBtn" ${ready?'':'disabled'} onclick="takePoints()">${d&&p?'Take '+d.pts+' points from '+p.house:'Take points'}</button>
+      <p class="note" style="margin-top:10px">The poster shows the house total, never who lost the points.</p>
+    </div>`})()}
   ${S.entries.length?`<h2 style="margin-top:26px">Recent awards</h2>
   <p class="hint">Every award records who made it. Tap × to take one back.</p>
-  <div class="card"><table>${S.entries.slice().reverse().slice(0,10).map(e=>`<tr>
+  <div class="card"><table>${S.entries.slice().reverse().slice(0,10).map(e=>{const v=entryPts(e),down=v<0;return `<tr>
     <td style="font-family:var(--mono);font-size:10.5px;color:var(--ink-soft)">${fmtDate(e.date)}</td>
     <td>${crest(house(e.house),14)}${esc(e.name)}${e.reason?'<br><span class="by">'+esc(e.reason)+'</span>':''}<br><span class="by">by ${esc(e.by||'—')}</span></td>
-    <td class="num">+${entryPts(e)}</td>
-    <td style="width:28px"><button class="x" onclick="delEntry('${e.id}')" aria-label="Remove">×</button></td></tr>`).join('')}</table></div>`:''}`}
+    <td class="num"${down?' style="color:var(--wax)"':''}>${down?'−'+Math.abs(v):'+'+v}</td>
+    <td style="width:28px"><button class="x" onclick="delEntry('${e.id}')" aria-label="Remove">×</button></td></tr>`}).join('')}</table></div>`:''}`}
 
 function viewTeam(){
   if(!canEdit())return lockPanel('The Team');
@@ -911,6 +1034,7 @@ function viewMgrs(){
   ${canManage()?mgrForm():''}
   ${canManage()?targetsEditor():''}
   ${canManage()?extrasEditor():''}
+  ${canManage()?misdeedsEditor():''}
   <h2 style="margin-top:28px">The rules of points</h2>
   <div class="card">
     <div class="field"><label>Pts / store target — earned by each partner on the shift</label>
@@ -928,7 +1052,9 @@ function viewMgrs(){
       <input type="number" min="0" value="${S.maxExtraHouse}" onchange="setCfg('maxExtraHouse',this.value)"></div></div>
     <div class="field"><label>Number of houses</label>
       <select onchange="setCfg('houseCount',this.value)">${[2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===(S.houseCount||4)?'selected':''}>${n} — ${ALL_HOUSES.slice(0,n).map(h=>h.id.split(' ')[0]).join(', ')}</option>`).join('')}</select></div>
-    <div class="tgt ${S.perCapita?'on':''}" onclick="togglePC()" style="border-top:1px solid var(--parch-3)">
+    <div class="tgt ${S.perCapita?'on':''}" role="checkbox" tabindex="0"
+      aria-checked="${S.perCapita?'true':'false'}" onclick="togglePC()"
+      onkeydown="kbd(event,togglePC)" style="border-top:1px solid var(--parch-3)">
       <div class="box">✓</div><div class="lb"><b>Score per partner</b><i>Fair when houses differ in size</i></div></div>
     <p class="note" style="margin-top:10px">Shared by every house and every manager — change them for everyone at once. Every target a shift hits earns Pts / store target for each partner who worked it, scored to their own houses like any other points; set to 0 to track targets without scoring them.</p></div>`}
 
@@ -970,6 +1096,8 @@ function viewRotation(){
   <button class="btn danger" onclick="resetAll()">Reset everything</button>`:''}`}
 
 /* ---------- actions ---------- */
+/* 11: Space/Enter on the role=checkbox divs */
+function kbd(ev,fn){if(ev.key===' '||ev.key==='Enter'||ev.key==='Spacebar'){ev.preventDefault();fn()}}
 function go(t){tab=t;render();window.scrollTo({top:0,behavior:'smooth'})}
 function grabShiftInputs(){const o={};
   S.roster.forEach(p=>{
@@ -982,7 +1110,75 @@ function putShiftInputs(o){Object.keys(o).forEach(k=>{
 function extrasUsed(weekStart,houseId,name){
   const end=addDays(weekStart,6);
   return S.entries.filter(e=>(e.extra||0)>0&&e.date>=weekStart&&e.date<=end
-    &&(!houseId||e.house===houseId)&&(!name||e.name===name)).length}
+    &&(!houseId||houseSlot(e.house)===houseId)&&(!name||e.name===name)).length}
+/* A deduction is an ordinary entry with a negative `extra` — nothing new is
+   stored, so merge, tombstones, undo and restore work untouched and older
+   backups load unchanged. extrasUsed() filters on extra>0, so taking points
+   does not eat into the deeds allowance. */
+function deductsUsed(weekStart,houseId,name){
+  const end=addDays(weekStart,6);
+  return S.entries.filter(e=>(e.extra||0)<0&&e.date>=weekStart&&e.date<=end
+    &&(!houseId||houseSlot(e.house)===houseId)&&(!name||e.name===name)).length}
+function deductAllowance(date,houseId,name){
+  const wk=mondayOf(date);
+  return {house:Math.max(0,(S.maxDeductHouse||0)-deductsUsed(wk,houseId,null)),
+          partner:Math.max(0,(S.maxDeductPartner||0)-deductsUsed(wk,null,name))}}
+function setMd(id){mdDraft.mdId=id;render()}
+/* the note gates the button, but re-rendering per keystroke would take the
+   focus out of the field mid-sentence, so flip the button directly */
+function setMdNote(el){
+  mdDraft.detail=el.value;
+  const b=document.getElementById('mdBtn');
+  if(b)b.disabled=!(mdDraft.name&&mdDraft.mdId&&mdDraft.detail.trim())}
+function takePoints(){
+  if(!canEdit())return;
+  const p=S.roster.find(x=>x.name===mdDraft.name);
+  if(!p){mdDraft.name='';toast('That partner is no longer on the roll');render();return}
+  const d=misdeedsList().find(x=>x.id===mdDraft.mdId);
+  if(!d){toast('Choose what happened');return}
+  if(!mdDraft.detail.trim()){toast('Say what happened — a deduction needs a note');return}
+  const a=deductAllowance(mdDraft.date,p.house,p.name);
+  if(a.partner<=0){toast(shortName(p)+' has already lost points this week');return}
+  if(a.house<=0){toast(p.house+' has already lost points '+S.maxDeductHouse+' times this week');return}
+  askConfirm('Take '+d.pts+' points from '+p.house+' for '+shortName(p)+'?',()=>{
+    snap();
+    S.entries.push({id:uid(),date:mdDraft.date,name:p.name,house:p.house,smg:0,tgt:0,
+      extra:-d.pts,reason:d.label+' — '+mdDraft.detail.trim(),by:me.name});
+    mdDraft={name:'',mdId:'',detail:'',date:todayISO()};
+    save();render();toast(d.pts+' points from '+p.house,1)})}
+function misdeedsEditor(){
+  const rows=misdeedsList().map(x=>`<div class="wk" style="gap:6px">
+    <input type="text" value="${esc(x.label)}" style="flex:1;padding:8px 9px;font-size:13.5px"
+      onchange="setMisdeedCfg('${esc(x.id)}','label',this.value)" aria-label="Misdeed name">
+    <input type="number" min="0" value="${x.pts}" style="flex:0 0 60px;padding:8px 4px;text-align:center;font-family:var(--mono)"
+      onchange="setMisdeedCfg('${esc(x.id)}','pts',this.value)" aria-label="Points taken for ${esc(x.label)}">
+    <button class="x" style="flex:0 0 26px" onclick="delMisdeed('${esc(x.id)}')" aria-label="Remove ${esc(x.label)}">×</button></div>`).join('');
+  return `<h2 style="margin-top:28px">Points taken</h2>
+  <p class="hint">The other side of the deeds list. Fixed amounts, the same for every house, so it never depends on who is asking. A house can lose points ${S.maxDeductHouse} times a week and nobody more than ${S.maxDeductPartner}. Changing this list never rewrites points already taken.</p>
+  <div class="card" style="padding:10px 13px">${rows||'<span class="by">nothing here — points can only be taken for something on this list</span>'}</div>
+  <div class="card"><div class="row">
+    <input type="text" id="mdLabel" placeholder="New reason" onkeydown="if(event.key==='Enter')addMisdeed()">
+    <input type="number" min="0" id="mdPts" placeholder="Pts" style="flex:0 0 70px"></div>
+  <button class="btn ghost" style="margin-top:9px" onclick="addMisdeed()">Add reason</button></div>`}
+function setMisdeedCfg(id,k,v){
+  if(!canManage())return;
+  const x=misdeedsList().find(y=>y.id===id);if(!x)return;
+  if(k==='pts')x.pts=Math.max(0,Number(v)||0);else{const l=String(v).trim();if(!l)return;x.label=l}
+  save();render()}
+function delMisdeed(id){
+  if(!canManage())return;
+  const x=misdeedsList().find(y=>y.id===id);if(!x)return;
+  askConfirm('Remove "'+x.label+'" from the list? Points already taken for it are kept.',()=>{
+    S.misdeeds=misdeedsList().filter(y=>y.id!==id);save();render();toast('Removed')})}
+function addMisdeed(){
+  if(!canManage())return;
+  const l=((document.getElementById('mdLabel')||{}).value||'').trim();
+  const p=Math.max(0,Number((document.getElementById('mdPts')||{}).value)||0);
+  if(!l){toast('Give the reason a name');return}
+  if(!p){toast('Give it some points');return}
+  if(!Array.isArray(S.misdeeds))S.misdeeds=[];
+  S.misdeeds.push({id:uid(),label:l,pts:p});
+  save();render();toast('"'+l+'" added at '+p+' points')}
 function extrasEditor(){
   const rows=extrasList().map(x=>`<div class="wk" style="gap:6px">
     <input type="text" value="${esc(x.label)}" style="flex:1;padding:8px 9px;font-size:13.5px"
@@ -1155,7 +1351,11 @@ function sortHat(){
   if(!S.roster.length){toast('Nobody to sort yet');return}
   askConfirm('Let the Sorting Hat place everyone anew?',()=>{
   snap();
-  const n=HOUSES.length,mix=a=>a.slice().sort(()=>Math.random()-.5);
+  /* 10: Fisher-Yates. sort(()=>Math.random()-.5) is not a uniform shuffle,
+     and for a sorting hat even placement is the whole point. */
+  const n=HOUSES.length,mix=a=>{const b=a.slice();
+    for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=b[i];b[i]=b[j];b[j]=t}
+    return b};
   let i=0;
   mix(S.roster.filter(p=>p.till)).forEach(p=>{p.house=HOUSES[i++%n].id});
   mix(S.roster.filter(p=>!p.till)).forEach(p=>{p.house=HOUSES[i++%n].id});
@@ -1179,7 +1379,7 @@ function restoreBackup(){
   askConfirm('Restore this backup? It replaces what is on the board now, for everyone.',()=>{
     snap();
     S=Object.assign(freshState(),d);
-    me=null;syncHouses();save();render();toast('Backup restored',1)})}
+    me=null;syncHouses();save(1);render();toast('Backup restored',1)})}
 function resetAll(){
   if(!canManage()){toast('Only the store manager can reset the board');return}
   askConfirm('Reset everything? Every partner, point, day, manager and password is wiped — for everyone using this board, not just you. This cannot be undone after the next change.',()=>{
