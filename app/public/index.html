@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The House Cup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --hall:#0C1226; --hall-2:#151E3D;
+  --candle:#F0C45A; --candle-dim:#9C7A34; --ember:#FF9E3D;
+  --parch:#EFE3C8; --parch-2:#DFCFA9; --parch-3:#C9B489;
+  --ink:#2A2015; --ink-soft:#6E5D42;
+  --gryf:#7C1420; --brass:#B9924F; --wax:#8E1B22;
+  --title:'Cinzel Decorative',Georgia,serif;
+  --display:'Cinzel',Georgia,'Times New Roman',serif;
+  --body:'EB Garamond',Georgia,serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:var(--body);font-size:15px;line-height:1.55;
+  background:var(--hall);color:var(--parch);min-height:100vh;padding-bottom:86px}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:var(--body);font-size:16px}
+
+.hall{position:relative;overflow:hidden;padding:24px 14px 22px;
+  background:radial-gradient(130% 60% at 50% 0%,rgba(240,196,90,.14),transparent 62%),
+    linear-gradient(180deg,#080D1C 0%,var(--hall) 34%,var(--hall-2) 100%);
+  border-bottom:1px solid rgba(185,146,79,.3)}
+#sky,#candles{position:absolute;inset:0;pointer-events:none}
+.star{position:absolute;background:#fff;border-radius:50%;animation:tw 4s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.15}50%{opacity:.75}}
+.shoot{position:absolute;top:11%;left:-10%;width:74px;height:1.5px;border-radius:2px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),#FFF6DC 55%,rgba(255,255,255,0));
+  opacity:0;transform:rotate(9deg);animation:shoot 11s ease-in 5s infinite;pointer-events:none}
+@keyframes shoot{0%,93%{opacity:0;transform:translate(0,0) rotate(9deg)}
+  94%{opacity:.85}100%{opacity:0;transform:translate(115vw,10vh) rotate(9deg)}}
+.cdl{position:absolute;width:7px;animation:float 7s ease-in-out infinite}
+.cdl .stick{width:7px;border-radius:2px;background:linear-gradient(180deg,#F4EEDC,#C9BC9A);box-shadow:0 0 8px rgba(240,196,90,.25)}
+.cdl .flame{width:7px;height:11px;margin:0 auto 1px;border-radius:50% 50% 45% 45%;
+  background:radial-gradient(circle at 50% 70%,#FFF3C4,var(--ember) 55%,rgba(255,158,61,0) 78%);
+  animation:flick 1.7s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes flick{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.18) scaleX(.9)}}
+.hall-in{position:relative;z-index:2}
+.eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--candle-dim);margin:0 0 7px;text-align:center}
+h1{font-family:var(--title);font-weight:700;font-size:22px;line-height:1.15;margin:0;
+  color:var(--candle);text-align:center;text-shadow:0 0 22px rgba(240,196,90,.35)}
+.rule{display:flex;align-items:center;justify-content:center;gap:9px;margin:8px 0 2px;color:var(--candle-dim);font-size:9px}
+.rule:before,.rule:after{content:'';height:1px;width:44px;background:linear-gradient(90deg,transparent,rgba(185,146,79,.75),transparent)}
+.storeline{font-size:13px;color:rgba(239,227,200,.55);margin:6px 0 0;text-align:center;font-style:italic}
+.storeline input{background:none;border:none;border-bottom:1px dotted rgba(185,146,79,.55);
+  color:rgba(239,227,200,.8);font-size:13px;font-style:italic;padding:1px 2px;width:8.5em;text-align:center}
+.storeline input:focus{outline:none;border-bottom-color:var(--candle)}
+.who{text-align:center;margin-top:10px}
+.who button{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--candle-dim);border:1px solid rgba(185,146,79,.4);border-radius:99px;padding:5px 13px}
+.who button.on{color:var(--candle);border-color:rgba(240,196,90,.7)}
+
+.glasses{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:16px}
+.glass{text-align:center;position:relative}
+.glass .crest{height:21px;margin-bottom:2px}
+.glass svg.hg{width:100%;height:auto;max-height:196px;display:block}
+.leading .hg{animation:leadglow 3.4s ease-in-out infinite}
+@keyframes leadglow{0%,100%{filter:drop-shadow(0 0 8px rgba(240,196,90,.32))}
+  50%{filter:drop-shadow(0 0 17px rgba(240,196,90,.6))}}
+.gname{font-family:var(--display);font-size:9px;letter-spacing:.05em;font-weight:600;
+  margin-top:5px;color:rgba(239,227,200,.82);text-transform:uppercase}
+@media(min-width:500px){.gname{font-size:12px}.glasses{gap:10px}}
+.gpts{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:1px}
+.gsub{font-family:var(--mono);font-size:8px;color:rgba(239,227,200,.42)}
+.fill-rect{transition:y 1s cubic-bezier(.2,.7,.3,1),height 1s cubic-bezier(.2,.7,.3,1)}
+.spk{animation:spk 3.4s ease-in-out infinite}
+@keyframes spk{0%,100%{opacity:0}12%{opacity:0}50%{opacity:.85}88%{opacity:0}}
+.pour{opacity:0}
+.pouring .pour{animation:drop 1.05s ease-in forwards}
+.gain{position:absolute;top:30px;left:0;right:0;text-align:center;font-family:var(--mono);
+  font-weight:600;font-size:14px;color:var(--candle);opacity:0;pointer-events:none;
+  text-shadow:0 1px 6px rgba(0,0,0,.65);animation:gainrise 1.5s ease-out forwards}
+@keyframes gainrise{0%{opacity:0;transform:translateY(10px)}18%{opacity:1}72%{opacity:1}100%{opacity:0;transform:translateY(-24px)}}
+@keyframes drop{0%{opacity:1;transform:translateY(0)}86%{opacity:1}100%{opacity:0;transform:translateY(58px)}}
+@media(prefers-reduced-motion:reduce){.fill-rect{transition:none}.pouring .pour{animation:none}
+  .gain{display:none}.shoot{display:none}.spk{animation:none;opacity:.35}
+  .sash,.sash-in{animation:none}
+  #gate.err input,#gate .g-reveal,#gate.leaving{animation:none}
+  .leading .hg{animation:none;filter:drop-shadow(0 0 12px rgba(240,196,90,.45))}
+  .star,.cdl,.flame{animation:none!important}}
+
+.sheet{position:relative;color:var(--ink);padding:24px 17px 30px;min-height:62vh;
+  background:radial-gradient(80% 40% at 10% 0%,rgba(201,180,137,.35),transparent 55%),
+    radial-gradient(70% 45% at 95% 30%,rgba(201,180,137,.28),transparent 55%),
+    linear-gradient(178deg,var(--parch),#E7DABC 55%,var(--parch))}
+.sash{margin:-6px -17px 18px;padding:11px 14px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(100deg,#8A6A26,#D9B95E 30%,#F4E3AE 50%,#D9B95E 70%,#8A6A26);
+  background-size:220% 100%;color:#2A2015;font-family:var(--display);font-weight:700;
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);animation:sashsheen 4s linear infinite}
+.sash-in{animation:sashin .8s cubic-bezier(.2,.7,.3,1),sashsheen 4s linear .8s infinite}
+@keyframes sashin{0%{transform:translateX(-104%)}100%{transform:translateX(0)}}
+@keyframes sashsheen{0%{background-position:0 0}100%{background-position:220% 0}}
+.sheet:before{content:'';position:absolute;top:0;left:0;right:0;height:7px;
+  background:repeating-linear-gradient(90deg,var(--parch) 0 7px,transparent 7px 11px)}
+.sheet h2{font-family:var(--display);font-size:14px;letter-spacing:.14em;text-transform:uppercase;
+  margin:0 0 5px;font-weight:700;display:flex;align-items:center;gap:9px}
+.sheet h2:after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--parch-3),transparent)}
+.hint{font-size:14px;color:var(--ink-soft);margin:0 0 17px;font-style:italic;line-height:1.5}
+.card{background:rgba(255,252,244,.55);border:1px solid var(--parch-3);border-radius:3px;
+  padding:15px;margin-bottom:13px;box-shadow:0 1px 0 rgba(255,255,255,.6) inset}
+label{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-soft);margin:0 0 6px}
+.field{margin-bottom:15px}
+select,input[type=text],input[type=date],input[type=number],input[type=password],textarea{
+  width:100%;padding:11px 12px;border:1px solid var(--parch-3);border-radius:3px;
+  background:#FFFCF4;color:var(--ink);font-family:var(--body);font-size:16px}
+textarea{line-height:1.5;resize:vertical}
+select:focus,input:focus,textarea:focus{outline:2px solid var(--candle-dim);outline-offset:1px}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;max-width:100%;
+  min-height:46px;text-align:left;line-height:1.3}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:46px;height:46px;border-radius:3px;background:#FFFCF4;
+  border:1px solid var(--parch-3);font-size:21px;font-family:var(--display);color:var(--ink);flex:0 0 auto}
+.stepper .val{flex:1;text-align:center;font-family:var(--mono);font-size:23px;font-weight:600}
+.btn{display:block;width:100%;padding:14px;border-radius:3px;background:var(--ink);color:var(--parch);
+  font-family:var(--display);font-size:12px;letter-spacing:.15em;text-transform:uppercase;font-weight:600}
+.btn:disabled{opacity:.32}
+.btn.ghost{background:none;border:1px solid var(--parch-3);color:var(--ink-soft);font-size:10.5px;padding:12px}
+.btn.danger{background:none;border:1px solid rgba(124,20,32,.45);color:var(--gryf);font-size:10.5px;padding:12px}
+.row{display:flex;gap:9px}
+.row>*{flex:1}
+.seg{display:flex;border:1px solid var(--parch-3);border-radius:3px;overflow:hidden;margin-bottom:15px}
+.seg button{flex:1;padding:10px 3px;font-family:var(--display);font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-soft)}
+.seg button.on{background:var(--ink);color:var(--parch)}
+.tgt{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--parch-3);cursor:pointer}
+.tgt:first-of-type{border-top:none}
+.tgt .box{width:26px;height:26px;flex:0 0 26px;border:1.5px solid var(--parch-3);border-radius:3px;
+  background:#FFFCF4;display:flex;align-items:center;justify-content:center;font-size:16px;color:transparent}
+.tgt.on .box{background:#1E5C3A;border-color:#1E5C3A;color:#fff}
+.tgt .lb{flex:1}
+.tgt .lb b{font-weight:600}
+.tgt .lb i{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-soft);font-style:normal;margin-top:1px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-soft);text-align:left;padding:0 5px 8px;font-weight:500}
+td{padding:9px 5px;border-top:1px solid var(--parch-3);vertical-align:middle}
+td.num{font-family:var(--mono);text-align:right;font-weight:600;font-size:13px}
+.crest-sm{vertical-align:-3px;margin-right:6px}
+.x{color:var(--ink-soft);font-size:18px;padding:2px 6px;line-height:1}
+.by{font-family:var(--mono);font-size:9px;color:var(--ink-soft);letter-spacing:.05em}
+.bar{height:6px;background:var(--parch-2);border-radius:3px;overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;transition:width .7s ease}
+.prog-row{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;margin-top:13px}
+.prog-row span:last-child{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft)}
+.empty{text-align:center;padding:34px 16px;color:var(--ink-soft);font-size:14.5px;
+  font-style:italic;line-height:1.65;border:1px dashed var(--parch-3);border-radius:3px}
+.note{font-size:12.5px;color:var(--ink-soft);font-style:italic;line-height:1.5;margin-top:15px}
+.quiet{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-soft);opacity:.8;border-bottom:1px dotted var(--parch-3);padding:2px 1px}
+.quiet:active{opacity:1}
+.seal{width:54px;height:54px;margin:26px auto 0;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#B8323A,var(--wax) 60%,#5E1015);
+  display:flex;align-items:center;justify-content:center;font-family:var(--title);
+  font-size:19px;color:rgba(255,225,225,.72);box-shadow:0 2px 5px rgba(0,0,0,.25);transform:rotate(-7deg)}
+.lock{text-align:center;padding:8px 0 4px}
+.lock .ico{font-size:30px;color:var(--parch-3);line-height:1}
+.wk{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--parch-3)}
+.wk .nm{flex:1;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wk input{width:62px;flex:0 0 62px;padding:8px 6px;text-align:center;font-family:var(--mono);font-size:15px}
+.prow{padding:12px 0;border-top:1px solid var(--parch-3)}
+.prow:first-child{border-top:none}
+.prow.dim{opacity:.55}
+.pname{font-size:14.5px;margin-bottom:8px;display:flex;align-items:center;gap:2px}
+.pctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pctl select{width:auto;flex:0 0 auto;padding:7px 8px;font-size:12.5px;max-width:44vw}
+.tgl{padding:7px 12px;border:1px solid var(--parch-3);border-radius:99px;background:#FFFCF4;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-soft)}
+.tgl.on{background:var(--ink);color:var(--parch);border-color:var(--ink)}
+.tgl.del{border-color:rgba(124,20,32,.32);color:var(--gryf)}
+.undobar{width:100%;padding:12px;margin-bottom:15px;border-radius:3px;
+  border:1px solid var(--parch-3);background:rgba(255,252,244,.7);color:var(--ink);
+  font-family:var(--display);font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:600}
+.chip{display:inline-block;padding:5px 12px;margin:0 5px 6px 0;border-radius:99px;
+  border:1px solid var(--parch-3);background:#FFFCF4;font-size:13.5px;line-height:1.3}
+.hcard{margin-bottom:16px}
+.hcard .hh{display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.hcard .hh em{margin-left:auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;
+  font-style:normal;color:var(--ink-soft);text-transform:none}
+.hgroup{font-family:var(--display);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  font-weight:700;margin:16px 0 2px;display:flex;align-items:center;gap:7px}
+
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(8,13,28,.97);
+  backdrop-filter:blur(9px);border-top:1px solid rgba(185,146,79,.32);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;padding:12px 1px 13px;font-family:var(--display);font-size:9px;
+  letter-spacing:.09em;text-transform:uppercase;color:rgba(239,227,200,.4);
+  border-top:2px solid transparent;margin-top:-1px}
+nav button[aria-current=true]{color:var(--candle);border-top-color:var(--candle)}
+#gate{display:none;position:fixed;inset:0;z-index:70;flex-direction:column;align-items:center;justify-content:center;padding:26px;
+  background:radial-gradient(130% 60% at 50% 0%,rgba(240,196,90,.13),transparent 62%),
+    linear-gradient(180deg,#080D1C,#0C1226 40%,#151E3D)}
+#gate .g-title{font-family:var(--title);color:var(--candle);font-size:26px;margin:0 0 6px;text-align:center;
+  text-shadow:0 0 22px rgba(240,196,90,.35)}
+#gate .g-sub{font-family:var(--mono);font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--candle-dim);margin:0 0 26px;text-align:center}
+#gate input{width:158px;text-align:center;font-family:var(--mono);font-size:24px;letter-spacing:.35em;
+  background:rgba(255,252,244,.06);border:1px solid rgba(185,146,79,.5);color:var(--parch);border-radius:3px;padding:12px 4px}
+#gate input:focus{outline:2px solid var(--candle-dim)}
+#gate .g-btn{margin-top:18px;padding:12px 36px;border:1px solid rgba(240,196,90,.7);border-radius:99px;
+  color:var(--candle);font-family:var(--display);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+#gate.err input{animation:gshake .35s}
+@keyframes gshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+#gate .g-reveal{text-align:center;animation:grevin .6s ease-out}
+@keyframes grevin{0%{opacity:0;transform:scale(.86)}100%{opacity:1;transform:scale(1)}}
+#gate.leaving{animation:gfade .5s ease forwards}
+@keyframes gfade{100%{opacity:0}}
+#ask{display:none;position:fixed;inset:0;z-index:80;background:rgba(8,13,28,.62);
+  align-items:center;justify-content:center;padding:22px}
+.ask-card{background:var(--parch);color:var(--ink);border-radius:4px;max-width:340px;width:100%;
+  padding:20px 18px;box-shadow:0 12px 40px rgba(0,0,0,.5);font-size:15px;line-height:1.55;font-family:var(--body)}
+.ask-card p{margin:0 0 16px}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(12px);
+  background:#0C1226;border:1px solid rgba(185,146,79,.55);color:var(--candle);
+  padding:11px 20px;border-radius:2px;font-family:var(--display);font-size:13px;
+  opacity:0;pointer-events:none;transition:all .3s ease;z-index:20;
+  box-shadow:0 6px 26px rgba(0,0,0,.5);max-width:88vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .undo{margin-left:12px;padding:4px 12px;border:1px solid var(--candle);border-radius:99px;
+  font-family:var(--display);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--candle)}
+.toast .undo:active{background:var(--candle);color:#0C1226}
+#cert{display:none;position:fixed;inset:0;z-index:60;background:#fff;color:#000;
+  overflow:auto;padding:14px 14px 40px}
+#certbar{display:flex;gap:10px;justify-content:flex-end;margin-bottom:14px}
+.cert-page{max-width:640px;margin:0 auto;background:#fff}
+.cert-frame{border:3px double #000;padding:38px 26px 28px;text-align:center;
+  font-family:var(--body);color:#000}
+.cert-kick{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase}
+.cert-crest{margin:22px 0 16px}
+.cert-sub{font-family:var(--display);font-size:12px;letter-spacing:.3em;text-transform:uppercase}
+.cert-house{font-family:var(--title);font-size:40px;line-height:1.1;margin:10px 0 4px;text-transform:uppercase}
+.cert-dates{font-size:17px;font-style:italic;margin-bottom:20px}
+.cert-score{font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+  border-top:1px solid #000;border-bottom:1px solid #000;padding:11px 0;margin-bottom:20px}
+.cert-names{font-size:17px;line-height:2;max-width:30em;margin:0 auto 22px}
+.cert-rest{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:30px}
+.cert-sign{display:flex;gap:34px;justify-content:center;font-family:var(--mono);
+  font-size:9px;letter-spacing:.18em;text-transform:uppercase}
+.cert-sign div{flex:1;max-width:190px}
+.cert-sign i{display:block;border-bottom:1px solid #000;height:32px;margin-bottom:5px}
+@media print{
+  @page{size:A4 portrait;margin:16mm}
+  body{background:#fff;padding:0}
+  .hall,nav,.sheet,.toast,#ask,#gate{display:none!important}
+  #cert{position:static;display:block!important;padding:0;overflow:visible}
+  #certbar{display:none!important}
+  .cert-frame{border-color:#000;padding:46px 34px 34px}
+}
+.loading{padding:60px 20px;text-align:center;color:var(--candle-dim);font-family:var(--display);font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="hall">
+  <div id="sky"></div><div id="candles"></div>
+  <div class="hall-in">
+    <p class="eyebrow" id="eyebrow">The Standings</p>
+    <h1>The House Cup</h1>
+    <div class="rule">✦</div>
+    <p class="storeline"><input id="storeName" type="text" maxlength="22" placeholder="your store" aria-label="Store name"> · <span id="cupDates">—</span></p>
+    <div class="who" id="who"></div>
+    <div class="glasses" id="glasses"></div>
+  </div>
+</div>
+
+<div class="sheet" id="sheet"><div class="loading">Lighting the candles…</div></div>
+
+<nav id="nav" style="display:none"></nav>
+<div id="gate"></div>
+<div id="ask"></div>
+<div class="toast" id="toast"></div>
+<div id="cert"></div>
+
+<script>
+/* ---- self-hosted storage adapter ----
+   Same contract as Claude-artifact storage; the rest of the app is untouched.
+   GET  api/state -> 200 {json} | 204 empty (fresh board)
+   PUT  api/state -> 204                                            */
+window.storage={
+  async get(key,shared){
+    const r=await fetch('api/state',{cache:'no-store'});
+    if(r.status!==200)throw new Error('no state yet');
+    const v=await r.text();
+    if(!v)throw new Error('empty state');
+    return {value:v,key:key,shared:!!shared}},
+  async set(key,val,shared){
+    const r=await fetch('api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:val});
+    if(!r.ok)throw new Error('save failed');
+    return {key:key,value:val,shared:!!shared}}};
+</script>
+<script>
+const ALL_HOUSES=[
+  {id:'Gryffindor',color:'#8E1220',gem:'#E24A5E',alt:'#D4AF37',beast:'lion'},
+  {id:'Slytherin', color:'#0E5238',gem:'#3FCF97',alt:'#AAB7B7',beast:'serpent'},
+  {id:'Ravenclaw', color:'#2A2A7A',gem:'#7B78E5',alt:'#946B2D',beast:'eagle'},
+  {id:'Hufflepuff',color:'#C08A12',gem:'#FFD84D',alt:'#2B2015',beast:'badger'},
+  {id:'Horned Serpent',color:'#0E5A63',gem:'#41C6D4',alt:'#CFE9EC',beast:'serpent'},
+  {id:'Wampus',       color:'#A6521C',gem:'#F09246',alt:'#F2DCC4',beast:'lion'},
+  {id:'Thunderbird',  color:'#5C3C7A',gem:'#B98CE0',alt:'#E7D8F2',beast:'eagle'},
+  {id:'Pukwudgie',    color:'#8C2B52',gem:'#EE7BA4',alt:'#F7D9E4',beast:'badger'}
+];
+let HOUSES=ALL_HOUSES.slice(0,4);
+function syncHouses(){
+  const n=Math.min(Math.max(S.houseCount||4,2),8);
+  HOUSES=ALL_HOUSES.slice(0,n);
+  const ids=HOUSES.map(h=>h.id);
+  S.roster.forEach((p,i)=>{if(!ids.includes(p.house))p.house=ids[i%n]});
+  S.managers.forEach(m=>{if(m.house&&!ids.includes(m.house))m.house=''});
+}
+const DEFAULT_TARGETS=[
+  {k:'venti',label:'Venti mix',sub:'32% of all drinks'},
+  {k:'shots',label:'Extra shots',sub:'£452 for the day'},
+  {k:'atv',label:'ATV',sub:'£8 average transaction'}
+];
+function targetsList(){return (S&&Array.isArray(S.targets))?S.targets:DEFAULT_TARGETS}
+const DEFAULT_EXTRAS=[
+  {id:'cover', pts:25,label:'Covered a shift at short notice'},
+  {id:'coffee',pts:15,label:'Ran a coffee tasting for the team'},
+  {id:'safety',pts:10,label:'Spotted and fixed a safety or hygiene problem'},
+  {id:'waste', pts:10,label:'Brought food waste under target'},
+  {id:'regular',pts:5,label:'Went out of their way for a regular'}
+];
+function extrasList(){return (S&&Array.isArray(S.extras))?S.extras:DEFAULT_EXTRAS}
+const KEY='housecup:state';
+const SEED_MGRS=['Lukrecija Paresciute','Danny Rising','Kirsty Bryant','Ryan Thurlow','Erin Kiely','Jasmin Burton']
+  .map(n=>({id:'m'+n.split(' ')[0].toLowerCase(),name:n,house:'',
+    pin:n==='Danny Rising'?'9876':'',pw:'',role:n==='Danny Rising'?'super':''}));
+SEED_MGRS.push({id:'madmin',name:'admin',house:'',pin:'admin',pw:'',role:'admin'});
+const SEED_ROSTER=['Anna Plackowska','Daisy Glister','Daniel Hook','Effienia Averkiou','Ganna Slynok',
+  'Jemma Gallacher','Macey Melanaphy','Maia Allsop','Martyna Gorska','Mia Kent','Natalia Bone',
+  'Olivia Reed','Pamela Watson-Smith','Rebecca Fiske','Reggie Everitt','Samuel Robertson','Travis Fulcher']
+  .map((n,i)=>({id:'p'+n.split(' ')[0].toLowerCase(),name:n,
+    house:['Gryffindor','Slytherin','Ravenclaw','Hufflepuff'][i%4]}));
+const DEFAULT={store:'',ptsSmg:10,storeHitPoints:10,perCapita:true,houseCount:4,maxExtraPartner:2,maxExtraHouse:6,extras:DEFAULT_EXTRAS,targets:DEFAULT_TARGETS,posterPin:'1234',smgCount:0,smgTarget:100,smgReward:50,
+  roster:[],entries:[],days:[],archive:[],managers:[],deleted:[],cupStart:todayISO(),rotationDate:''};
+let S=null,tab='hall',me=null,certWeek=null;
+let dayDraft={date:todayISO(),shift:(new Date().getHours()<15?'am':'pm'),crew:[]};
+function shiftName(s){return s==='am'?'Morning':s==='pm'?'Afternoon':'All day'}
+
+function todayISO(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+function uid(){return Math.random().toString(36).slice(2,9)}
+async function sha256(t){
+  const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));
+  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function house(id){return HOUSES.find(h=>h.id===id)||HOUSES[0]}
+function fmtDate(iso){if(!iso)return '—';const p=iso.split('-');return p[2]+'/'+p[1]}
+function n1(x){return Number.isInteger(x)?String(x):x.toFixed(1)}
+
+function star(cx,cy,R,r,n){let d='';for(let i=0;i<n*2;i++){
+  const a=Math.PI*i/n-Math.PI/2,rad=i%2?r:R;
+  d+=(i?'L':'M')+(cx+Math.cos(a)*rad).toFixed(2)+' '+(cy+Math.sin(a)*rad).toFixed(2)}return d+'Z'}
+function beast(k,c,c2){
+  if(k==='lion')return `<path d="${star(12,12.6,5.3,3.1,11)}" fill="${c2}"/><circle cx="12" cy="12.6" r="2.9" fill="${c}"/>`;
+  if(k==='serpent')return `<path d="M9 8.6c3.4-1.6 6.2.4 5.4 2.6-.7 2-4.4 1.6-4.8 3.4-.4 1.8 2.4 2.6 5 1.4" fill="none" stroke="${c2}" stroke-width="1.9" stroke-linecap="round"/><circle cx="9" cy="8.6" r="1.5" fill="${c2}"/>`;
+  if(k==='eagle')return `<path d="M12 8.2 4.4 12.6l4.6.5L12 17.4l3-4.3 4.6-.5Z" fill="${c2}"/>`;
+  return `<path d="M12 7.2c3.4 0 5 2.5 5 5.5s-2 5.1-5 5.1-5-2.1-5-5.1 1.6-5.5 5-5.5Z" fill="${c2}"/><path d="M11 7.6h2v10h-2z" fill="${c}"/><circle cx="8.6" cy="8.2" r="1.5" fill="${c2}"/><circle cx="15.4" cy="8.2" r="1.5" fill="${c2}"/>`}
+function crest(h,size){return `<svg class="crest${size<20?' crest-sm':''}" width="${size}" height="${(size*1.06).toFixed(0)}" viewBox="0 0 24 25" aria-hidden="true">
+  <path d="M12 1.4 22.2 5.2V13c0 6.2-5.1 9.4-10.2 10.6C6.9 22.4 1.8 19.2 1.8 13V5.2Z" fill="${h.color}" stroke="${h.alt}" stroke-width="1.1"/>${beast(h.beast,h.color,h.alt)}</svg>`}
+
+function freshState(){
+  return JSON.parse(JSON.stringify(Object.assign({},DEFAULT,
+    {managers:SEED_MGRS,roster:SEED_ROSTER,cupStart:todayISO()})))}
+async function load(){
+  try{const r=await window.storage.get(KEY,true);S=Object.assign(freshState(),JSON.parse(r.value))}
+  catch(e){S=freshState()}
+  if(!S.days)S.days=[];
+  if(!Array.isArray(S.extras))S.extras=JSON.parse(JSON.stringify(DEFAULT_EXTRAS));
+  if(!Array.isArray(S.targets))S.targets=JSON.parse(JSON.stringify(DEFAULT_TARGETS));
+  if(!S.storeHitPoints)S.storeHitPoints=10;
+  if(!S.managers)S.managers=[];
+  if(!S.roster)S.roster=[];
+  const _del=S.deleted||[];
+  const _has=(list,full)=>{const f=full.split(' ')[0].toLowerCase();
+    return list.some(x=>{const n=(x.name||'').trim().toLowerCase();
+      return n===full.toLowerCase()||n===f})};
+  SEED_MGRS.forEach(sm=>{
+    if(_del.indexOf(sm.id)>=0||_has(S.managers,sm.name))return;
+    S.managers.push(Object.assign({},sm))});
+  SEED_ROSTER.forEach(sp=>{
+    if(_del.indexOf(sp.id)>=0||_has(S.roster,sp.name))return;
+    S.roster.push(Object.assign({},sp))});
+  S.roster.sort((a,b)=>a.name.localeCompare(b.name));
+  S.managers.forEach(m=>{if(!m.pin&&m.pw==='dbff5341acad5e2a58db4efd5e72e2d9a0a843a28e02b1183c68162d0a3a3de6'){m.pin='9876';m.pw=''}});
+  if(!S.managers.some(m=>m.role==='super')){
+    const d=S.managers.find(m=>m.name==='Danny Rising');
+    if(d){d.role='super';
+      if(!d.pin&&!d.pw)d.pin='9876'}}
+  syncHouses();
+  if(gateNeeded())roseOnce=true;  // save the arrival fill for the unlock reveal
+  sky();render()
+}
+let saving=false,lastRaw=null,roseOnce=false;
+function tomb(ids){
+  S.deleted=(S.deleted||[]).concat(ids.filter(Boolean));
+  if(S.deleted.length>800)S.deleted=S.deleted.slice(-800)}
+function mergeById(a,b,del){
+  const m={};
+  (b||[]).forEach(x=>{if(x&&x.id)m[x.id]=x});
+  (a||[]).forEach(x=>{if(x&&x.id)m[x.id]=x});
+  return Object.keys(m).filter(k=>del.indexOf(k)<0).map(k=>m[k])}
+function mergeState(loc,rem){
+  const del=[];
+  (loc.deleted||[]).concat(rem.deleted||[]).forEach(i=>{if(del.indexOf(i)<0)del.push(i)});
+  const out=Object.assign({},rem,loc);
+  out.deleted=del.slice(-800);
+  out.entries=mergeById(loc.entries,rem.entries,del);
+  out.days=mergeById(loc.days,rem.days,del);
+  out.roster=mergeById(loc.roster,rem.roster,del);
+  out.managers=mergeById(loc.managers,rem.managers,del);
+  out.archive=mergeById(loc.archive,rem.archive,del);
+  return out}
+async function save(){
+  if(saving)return;saving=true;
+  try{
+    let rem=null;
+    try{const r=await window.storage.get(KEY,true);rem=JSON.parse(r.value)}catch(e){}
+    if(rem)S=mergeState(S,rem);
+    lastRaw=JSON.stringify(S);
+    await window.storage.set(KEY,lastRaw,true);
+  }catch(e){toast("The owl didn't get through")}
+  saving=false}
+async function poll(){
+  if(document.hidden||saving||certWeek)return;
+  try{
+    const r=await window.storage.get(KEY,true);
+    if(!r||r.value===lastRaw)return;
+    const keep=grabShiftInputs();
+    S=mergeState(S,JSON.parse(r.value));lastRaw=JSON.stringify(S);
+    syncHouses();render();putShiftInputs(keep);
+  }catch(e){}}
+let unlocked=false;
+function gateNeeded(){return !me&&!unlocked&&!!(S&&S.posterPin)}
+function renderGate(){
+  const g=document.getElementById('gate');
+  if(!gateNeeded()){if(!g._leaving){g.style.display='none';g.innerHTML='';g._mode=''}return}
+  g.style.display='flex';
+  if(g._mode==='pin')return;
+  g._mode='pin';
+  g.innerHTML=`<p class="g-title">The House Cup</p>
+    <p class="g-sub">Enter the team pin</p>
+    <input id="gatePin" type="password" inputmode="numeric" maxlength="8" autocomplete="off" aria-label="Team pin"
+      onkeydown="if(event.key==='Enter')tryGate()">
+    <button class="g-btn" onclick="tryGate()">Unlock</button>`}
+function tryGate(){
+  const g=document.getElementById('gate');
+  const v=((document.getElementById('gatePin')||{}).value||'').trim();
+  if(v!==S.posterPin){g.classList.remove('err');void g.offsetWidth;g.classList.add('err');toast('That is not the pin');return}
+  unlocked=true;
+  const st=houseStats(),lead=HOUSES.map(h=>st[h.id]).sort((a,b)=>b.pts-a.pts)[0],lh=house(lead.id);
+  g._mode='reveal';
+  g.innerHTML=`<div class="g-reveal">${crest(lh,64)}
+    <p class="g-title" style="color:${lead.pts?lh.gem:'var(--candle)'};margin-top:12px">${lead.pts?esc(lead.id):'The race begins'}</p>
+    <p class="g-sub" style="margin:6px 0 0">${lead.pts?'lead the cup · '+n1(lead.pts)+' points':'no points on the board yet'}</p></div>`;
+  const rm=reducedMotion();
+  setTimeout(()=>{
+    g._leaving=true;
+    if(rm){g.style.display='none';g.innerHTML='';g._leaving=false;g._mode='';roseOnce=true;render();return}
+    g.classList.add('leaving');
+    roseOnce=false;render();
+    setTimeout(()=>{g.classList.remove('leaving');g.style.display='none';g.innerHTML='';g._leaving=false;g._mode=''},520)
+  },rm?0:1500)}
+let askFn=null;
+function askConfirm(msg,fn){askFn=fn;
+  const el=document.getElementById('ask');
+  el.innerHTML=`<div class="ask-card"><p>${esc(msg).replace(/\n/g,'<br>')}</p>
+    <div class="row"><button class="btn ghost" onclick="askClose()">Cancel</button>
+    <button class="btn" onclick="askYes()">Confirm</button></div></div>`;
+  el.style.display='flex'}
+function askClose(){askFn=null;const el=document.getElementById('ask');el.style.display='none';el.innerHTML=''}
+function askYes(){const f=askFn;askClose();if(f)f()}
+let undoSnap=null;
+function snap(){try{undoSnap=JSON.stringify(S)}catch(e){undoSnap=null}}
+function doUndo(){
+  if(!undoSnap)return;
+  try{S=JSON.parse(undoSnap)}catch(e){return}
+  undoSnap=null;syncHouses();save();render();toast('Undone')}
+function toast(m,undoable){
+  const t=document.getElementById('toast'),u=undoable&&undoSnap;
+  t.innerHTML=esc(m)+(u?' <button class="undo" onclick="doUndo()">Undo</button>':'');
+  t.style.pointerEvents=u?'auto':'none';
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h=setTimeout(()=>{t.classList.remove('show');t.style.pointerEvents='none'},u?9000:2600)}
+
+function sky(){
+  let s='';for(let i=0;i<44;i++){const z=Math.random()*1.6+.7;
+    s+=`<i class="star" style="left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*70).toFixed(1)}%;width:${z.toFixed(1)}px;height:${z.toFixed(1)}px;animation-delay:${(Math.random()*4).toFixed(1)}s"></i>`}
+  document.getElementById('sky').innerHTML=s+'<i class="shoot"></i>';
+  let c='';const xs=[6,20,37,58,75,92],hs=[28,44,22,50,32,40],ts=[14,6,24,10,19,4];
+  xs.forEach((x,i)=>{c+=`<div class="cdl" style="left:${x}%;top:${ts[i]}px;animation-delay:${(i*1.3).toFixed(1)}s;opacity:${(.4+i%3*.16).toFixed(2)}">
+    <div class="flame" style="animation-delay:${(i*.4).toFixed(1)}s"></div><div class="stick" style="height:${hs[i]}px"></div></div>`});
+  document.getElementById('candles').innerHTML=c}
+
+/* ---------- scoring ---------- */
+function shortName(p){
+  const parts=String(p.name).trim().split(/\s+/),f=parts[0];
+  if(!parts[1])return f;
+  const pool=S.roster.concat(S.managers||[]);
+  const twin=pool.filter(x=>{
+    const q=String(x.name).trim().split(/\s+/);
+    return q[0].toLowerCase()===f.toLowerCase()&&q[1]&&q[1][0].toLowerCase()===parts[1][0].toLowerCase()}).length>1;
+  return twin?f+' '+parts[1]:f+' '+parts[1][0]+'.'}
+function mondayOf(iso){const d=new Date(iso+'T00:00:00');
+  d.setDate(d.getDate()-((d.getDay()+6)%7));
+  return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+function addDays(iso,n){const d=new Date(iso+'T00:00:00');d.setDate(d.getDate()+n);
+  return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+function fmtLong(iso){try{return new Date(iso+'T00:00:00')
+  .toLocaleDateString('en-GB',{day:'numeric',month:'long'})}catch(e){return iso}}
+function weekStats(start){
+  const end=addDays(start,6),st={};
+  HOUSES.forEach(h=>st[h.id]={id:h.id,raw:0,smg:0,extra:0,tgt:0,members:0,pts:0});
+  S.roster.forEach(p=>{if(st[p.house])st[p.house].members++});
+  S.entries.forEach(e=>{if(e.date<start||e.date>end)return;const x=st[e.house];if(!x)return;
+    x.raw+=entryPts(e);x.smg+=e.smg||0;x.extra+=e.extra||0});
+  S.days.forEach(d=>{if(d.date<start||d.date>end)return;const x=st[d.house];if(!x)return;
+    x.tgt+=targetsList().filter(t=>d[t.k]).length});
+  HOUSES.forEach(h=>{const x=st[h.id];
+    x.pts=x.tgt*S.storeHitPoints+(S.perCapita&&x.members?Math.round(x.raw/x.members*10)/10:x.raw)});
+  return {start,end,list:HOUSES.map(h=>st[h.id]).sort((a,b)=>b.pts-a.pts)}}
+function weeksWithData(){
+  const set={};
+  S.entries.forEach(e=>set[mondayOf(e.date)]=1);
+  S.days.forEach(d=>set[mondayOf(d.date)]=1);
+  return Object.keys(set).sort().reverse()}
+function entryPts(e){return (e.smg||0)*S.ptsSmg+(e.extra||0)+(e.tgt||0)*S.storeHitPoints}
+function surveyReached(){return (S.smgTarget||0)>0&&(S.smgCount||0)>=S.smgTarget}
+function houseStats(){
+  const wk=new Date(Date.now()-6.5*864e5).toISOString().slice(0,10),st={};
+  HOUSES.forEach(h=>st[h.id]={id:h.id,raw:0,smg:0,extra:0,tgt:0,week:0,members:0,pts:0});
+  S.roster.forEach(p=>{if(st[p.house])st[p.house].members++});
+  S.entries.forEach(e=>{const s=st[e.house];if(!s)return;
+    const v=entryPts(e);s.raw+=v;s.smg+=(e.smg||0);s.extra+=(e.extra||0);if(e.date>=wk)s.week+=v});
+  S.days.forEach(d=>{const s=st[d.house];if(!s)return;
+    s.tgt+=targetsList().filter(t=>d[t.k]).length});
+  const svy=surveyReached()?(S.smgReward||0):0;
+  HOUSES.forEach(h=>{const s=st[h.id];
+    s.pts=svy+s.tgt*S.storeHitPoints+(S.perCapita&&s.members?Math.round(s.raw/s.members*10)/10:s.raw)});
+  const a=HOUSES.map(h=>st[h.id]).sort((x,y)=>y.pts-x.pts);
+  a.forEach((s,i)=>{s.rank=i>0&&a[i-1].pts===s.pts?a[i-1].rank:i+1});
+  return st}
+
+/* ---------- hourglass ---------- */
+function drawGlasses(){
+  const st=houseStats(),lead=Math.max(...HOUSES.map(h=>st[h.id].pts),1);
+  const gl=document.getElementById('glasses');
+  gl.style.gridTemplateColumns='repeat('+(HOUSES.length>6?4:(HOUSES.length>4?3:HOUSES.length))+',1fr)';
+  gl.innerHTML=HOUSES.map((h,gi)=>{
+    const s=st[h.id];
+    let pct=Math.min(s.pts/(lead*1.3),1);
+    if(s.pts>0)pct=Math.max(pct,.05);
+    const y=232-pct*138,y0=roseOnce?y:232;
+    return `<div class="glass ${s.rank===1&&s.pts>0?'leading':''}" id="glass-${h.id}">${crest(h,21)}
+      <svg class="hg" viewBox="0 0 100 250" aria-label="${h.id}: ${n1(s.pts)} points">
+      <defs>
+        <linearGradient id="brs-${h.id}" x1="0" x2="1"><stop offset="0" stop-color="#7E6130"/>
+          <stop offset=".45" stop-color="#DFC183"/><stop offset="1" stop-color="#7E6130"/></linearGradient>
+        <pattern id="gr-${h.id}" width="5" height="5" patternUnits="userSpaceOnUse">
+          <rect width="5" height="5" fill="${h.color}"/>
+          <circle cx="1.2" cy="1.4" r=".9" fill="${h.gem}" opacity=".95"/>
+          <circle cx="3.7" cy="3.4" r=".7" fill="#fff" opacity=".4"/>
+          <circle cx="3.9" cy="1" r=".5" fill="${h.gem}" opacity=".6"/></pattern>
+        <clipPath id="bulb-${h.id}"><path d="M19 15 L81 15 Q81 56 57 74 L57 84 L43 84 L43 74 Q19 56 19 15 Z"/></clipPath>
+        <clipPath id="cyl-${h.id}"><rect x="21" y="94" width="58" height="138"/></clipPath>
+      </defs>
+      <rect x="5" y="12" width="5" height="224" fill="url(#brs-${h.id})"/>
+      <rect x="90" y="12" width="5" height="224" fill="url(#brs-${h.id})"/>
+      <rect x="12" y="2" width="76" height="11" rx="4" fill="#E8E0CE"/>
+      <rect x="12" y="10" width="76" height="4" rx="1.5" fill="url(#brs-${h.id})"/>
+      <circle cx="22" cy="7" r="3.4" fill="url(#brs-${h.id})"/><circle cx="78" cy="7" r="3.4" fill="url(#brs-${h.id})"/>
+      <g clip-path="url(#bulb-${h.id})"><rect x="19" y="15" width="62" height="70" fill="url(#gr-${h.id})"/></g>
+      <path d="M19 15 L81 15 Q81 56 57 74 L57 84 L43 84 L43 74 Q19 56 19 15 Z"
+            fill="none" stroke="rgba(255,255,255,.34)" stroke-width="1.3"/>
+      <path d="M43 80 L26 74 L41 86 Z" fill="url(#brs-${h.id})"/>
+      <path d="M57 80 L74 74 L59 86 Z" fill="url(#brs-${h.id})"/>
+      <rect x="21" y="90" width="58" height="144" rx="2" fill="rgba(255,255,255,.055)" stroke="rgba(255,255,255,.28)" stroke-width="1.2"/>
+      <g clip-path="url(#cyl-${h.id})">
+        <rect class="fill-rect" x="21" y="${y0}" width="58" height="${232-y0}" data-y="${y.toFixed(1)}"
+          style="transition-delay:${(gi*.14).toFixed(2)}s" fill="url(#gr-${h.id})"/>
+        ${[[33,224,1.4],[62,214,1.1],[47,228,1.2],[70,222,1],[38,204,1.1],[57,196,1.3],[28,186,1],[66,176,1.2],[44,166,1.1],[35,146,1]]
+          .filter(sp=>sp[1]>y+8).map((sp,si)=>`<circle class="spk" cx="${sp[0]}" cy="${sp[1]}" r="${sp[2]}" fill="#FFF" opacity="0"
+            style="animation-delay:${(1.6+si*.7+gi*.3).toFixed(1)}s"/>`).join('')}
+      </g>
+      <rect x="17" y="150" width="66" height="7" rx="2" fill="url(#brs-${h.id})" opacity=".92"/>
+      <rect x="12" y="232" width="76" height="10" rx="3" fill="url(#brs-${h.id})"/>
+      <rect x="16" y="241" width="68" height="6" rx="2" fill="#6E5426"/>
+      <g class="pour"><rect x="47" y="86" width="6" height="10" fill="${h.gem}" opacity=".9"/>
+        <rect x="48.5" y="99" width="3" height="7" fill="${h.gem}" opacity=".7"/></g>
+      </svg>
+      <div class="gname">${h.id.slice(0,4)}</div>
+      <div class="gpts" style="color:${h.gem}">${n1(s.pts)}</div>
+      <div class="gsub">${s.members} ptnr</div></div>`}).join('');
+  document.getElementById('cupDates').textContent=
+    (S.entries.length||S.days.length)?'since '+fmtDate(S.cupStart):'term not begun';
+  if(!roseOnce){roseOnce=true;
+    const raf=window.requestAnimationFrame||function(f){setTimeout(f,16)};
+    raf(()=>raf(()=>{document.querySelectorAll('.fill-rect').forEach(r=>{
+      const ty=+r.dataset.y;if(!isFinite(ty))return;
+      r.setAttribute('y',ty);r.setAttribute('height',232-ty)})}))}}
+function reducedMotion(){return !!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)}
+function pour(id,amt){const el=document.getElementById('glass-'+id);if(!el)return;
+  el.classList.remove('pouring');void el.offsetWidth;el.classList.add('pouring');
+  if(amt&&!reducedMotion()){
+    const g=document.createElement('div');g.className='gain';g.textContent='+'+n1(amt);
+    el.appendChild(g);setTimeout(()=>{try{g.remove()}catch(e){}},1600)}
+  setTimeout(()=>el.classList.remove('pouring'),1150)}
+
+/* ---------- roles ---------- */
+function canEdit(){return !!me}
+function isSuper(m){return !!m&&m.role==='super'}
+function isAdmin(m){return !!m&&m.role==='admin'}
+function superSet(){return S.managers.some(isSuper)}
+function canManage(){return !S.managers.some(m=>m.pin||m.pw)||(!!me&&(isSuper(me)||isAdmin(me)||!superSet()))}
+function undoBar(){return undoSnap?`<button class="undobar" onclick="doUndo()">↩ Undo last change</button>`:''}
+function whoBar(){document.getElementById('who').innerHTML=me
+  ? `<button class="on" onclick="signOut()">${esc(me.name)} — sign out</button>`
+  : ``}
+function signOut(){me=null;tab='hall';toast('Signed out');render()}
+async function trySignIn(){
+  const id=((document.getElementById('who2')||{}).value)||'';
+  const v=((document.getElementById('pw')||{}).value)||'';
+  const m=S.managers.find(x=>x.id===id);
+  if(!m||!v){toast('Choose your name and enter your password');return}
+  let ok=false;
+  try{ok=!!m.pw&&(await sha256(v))===m.pw}catch(e){}
+  if(!ok&&m.pin&&m.pin===v)ok=true;
+  if(!ok){toast('That password is not recognised');return}
+  me=m;unlocked=true;tab='log';toast('Welcome, '+m.name);render()}
+function lockPanel(what){
+  if(!S.managers.some(m=>m.pin||m.pw))return `<h2>Set up the managers</h2>
+    <p class="hint">Give each manager a password of their own, and tap the star to name the store manager — from then on, only they can change passwords or manager access. As soon as anyone has a password, this page locks.</p>
+    ${mgrList()}${mgrForm()}
+    <p class="note">A courtesy lock, not real security. Invent a password for this — never one you use anywhere else.</p>`;
+  return `<h2>${what}</h2><p class="hint">Managers only. Baristas can see everything on the poster without signing in.</p>
+  <div class="card"><div class="lock"><div class="ico">✧</div></div>
+    <div class="field" style="margin-top:12px"><label>Your name</label>
+      <select id="who2">${S.managers.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select></div>
+    <div class="field"><label>Password</label>
+      <input type="password" id="pw" autocomplete="off" placeholder="••••••" onkeydown="if(event.key==='Enter')trySignIn()"></div>
+    <button class="btn" onclick="trySignIn()">Sign in</button></div>
+  <p class="note">Forgotten your password? The store manager can read it out or set you a new one. A courtesy lock, not real security — use a password invented for this and nothing else, never one from anywhere real.</p>`}
+function mgrList(){
+  if(!S.managers.length)return '<div class="empty">No managers yet.</div>';
+  if(!canManage())return `<div class="card" style="padding:10px 13px">
+    ${S.managers.filter(m=>!isAdmin(m)).map(m=>`<div class="wk"><span class="nm">${esc(m.name)}</span>
+      ${isSuper(m)?'<span class="by" style="flex:0 0 auto">★ store manager</span>':''}</div>`).join('')}</div>`;
+  return `<div class="card" style="padding:10px 13px">
+    <div class="wkhead" style="display:flex;gap:6px;padding-bottom:5px">
+      <span class="nm" style="flex:1"></span>
+      <span style="flex:0 0 26px;text-align:center;font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)">SM</span>
+      <span style="flex:0 0 96px;text-align:center;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)">Password</span>
+      <span style="flex:0 0 26px"></span></div>
+    ${S.managers.map(m=>`<div class="wk" style="gap:6px">
+      <span class="nm">${esc(m.name)}</span>
+      ${isAdmin(m)
+        ?`<span style="flex:0 0 26px;text-align:center;color:var(--ink-soft);font-size:13px;line-height:1" title="Maintenance account" aria-label="Maintenance account">⚙</span>`
+        :isSuper(m)
+        ?`<span style="flex:0 0 26px;text-align:center;color:var(--candle-dim);font-size:15px;line-height:1" title="Store manager" aria-label="Store manager">★</span>`
+        :`<button class="x" style="flex:0 0 26px;color:var(--ink-soft)" onclick="makeSuper('${m.id}')" aria-label="Make ${esc(m.name)} the store manager" title="Make store manager">☆</button>`}
+      <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+        value="${esc(m.pin||'')}" placeholder="${m.pw?'set — retype to show':'none'}"
+        style="flex:0 0 96px;padding:7px 4px;text-align:center;font-family:var(--mono);font-size:12px"
+        onchange="setMgrPw('${m.id}',this.value)">
+      <button class="x" style="flex:0 0 26px" onclick="delMgr('${m.id}')" aria-label="Remove">×</button></div>`).join('')}</div>`}
+function makeSuper(id){
+  if(!canManage())return;
+  const m=S.managers.find(x=>x.id===id);if(!m||isSuper(m)||isAdmin(m))return;
+  askConfirm('Make '+m.name+' the store manager? Only they will be able to change passwords and manager access.',()=>{
+    S.managers.forEach(x=>{if(x.role==='super')x.role=''});
+    m.role='super';if(me&&me.id===m.id)me=m;
+    save();render();toast(m.name+' is now the store manager')})}
+function setMgrPw(id,v){
+  if(!canManage()){toast('Only the store manager can change this');render();return}
+  const m=S.managers.find(x=>x.id===id);if(!m)return;
+  v=v.trim();if(!v)return;
+  m.pin=v;m.pw='';
+  if(me&&me.id===id)me=m;
+  save();render();toast(m.name+' can sign in with that password')}
+function mgrForm(){return `<div class="card">
+  <div class="field" style="margin-bottom:9px"><label>Add another manager</label>
+    <input type="text" id="mName" placeholder="Name" onkeydown="if(event.key==='Enter')addMgr()"></div>
+  <button class="btn ghost" onclick="addMgr()">Add</button></div>`}
+function addMgr(){
+  if(!canManage())return;
+  const el=document.getElementById('mName'),n=el.value.trim();
+  if(!n){el.focus();return}
+  if(S.managers.some(m=>m.name.toLowerCase()===n.toLowerCase())){toast('Already listed');return}
+  S.managers.push({id:uid(),name:n,house:'',pin:'',pw:'',role:''});
+  save();render();toast(n+' added — set them a password')}
+function delMgr(id){if(!canManage())return;
+  const m=S.managers.find(x=>x.id===id);if(!m)return;
+  if(isSuper(m)){toast('Name another store manager first');return}
+  if(isAdmin(m)){toast('The admin account is for maintenance and cannot be removed');return}
+  if(S.managers.length===1){toast('Keep at least one manager');return}
+  askConfirm('Remove '+m.name+"'s access?",()=>{
+    snap();tomb([id]);S.managers=S.managers.filter(x=>x.id!==id);if(me&&me.id===id)me=null;save();render();toast(m.name+' removed',1)})}
+
+/* ---------- certificate ---------- */
+function monoCrest(h,size){return `<svg width="${size}" height="${(size*1.06).toFixed(0)}" viewBox="0 0 24 25" aria-hidden="true">
+  <path d="M12 1.4 22.2 5.2V13c0 6.2-5.1 9.4-10.2 10.6C6.9 22.4 1.8 19.2 1.8 13V5.2Z" fill="none" stroke="#000" stroke-width="1.4"/>
+  ${beast(h.beast,'#fff','#000')}</svg>`}
+function openCert(start){certWeek=start;renderCert()}
+function closeCert(){certWeek=null;document.getElementById('cert').style.display='none';render()}
+function renderCert(){
+  const w=weekStats(certWeek),win=w.list[0],h=house(win.id);
+  const ppl=S.roster.filter(p=>p.house===win.id).map(p=>esc(shortName(p)));
+  const el=document.getElementById('cert');
+  el.innerHTML=`<div id="certbar">
+      <button class="btn ghost" style="width:auto;padding:10px 18px" onclick="closeCert()">Close</button>
+      <button class="btn" style="width:auto;padding:10px 22px" onclick="window.print()">Print</button></div>
+    <div class="cert-page"><div class="cert-frame">
+      <div class="cert-kick">${esc(S.store||'The Store')} &middot; House Cup</div>
+      <div class="cert-crest">${monoCrest(h,86)}</div>
+      <div class="cert-sub">Champions of the week</div>
+      <div class="cert-house">${esc(win.id)}</div>
+      <div class="cert-dates">${fmtLong(w.start)} &ndash; ${fmtLong(w.end)}</div>
+      <div class="cert-score">${n1(win.pts)} points${win.smg?' &middot; '+win.smg+' SMG responses':''}${win.extra?' &middot; '+win.extra+' extra':''}</div>
+      <div class="cert-names">${ppl.join(' &nbsp;&middot;&nbsp; ')||'&nbsp;'}</div>
+      <div class="cert-rest">${w.list.slice(1).map(x=>esc(x.id)+' '+n1(x.pts)).join(' &nbsp;&middot;&nbsp; ')}</div>
+      <div class="cert-sign"><div><i></i>Signed</div><div><i></i>Date</div></div>
+    </div></div>`;
+  el.style.display='block';
+  window.scrollTo({top:0})}
+
+/* ---------- render ---------- */
+function render(){
+  const sn=document.getElementById('storeName');
+  sn.value=S.store||'';sn.readOnly=!me;
+  drawGlasses();whoBar();
+  document.getElementById('eyebrow').textContent=
+    ({hall:'The Standings',pin:'Managers',log:'Award Points',team:'The Team',mgrs:'The Managers',rotation:'The Cup'})[tab]||'The Standings';
+  document.getElementById('sheet').innerHTML=
+    (({hall:viewHall,pin:viewPin,log:viewLog,team:viewTeam,mgrs:viewMgrs,rotation:viewRotation})[tab]||viewHall)();
+  const nav=document.getElementById('nav');
+  if(me){nav.style.display='flex';
+    nav.innerHTML=[['log','Award'],['team','Team'],['mgrs','Managers'],['rotation','Cup'],['hall','Poster']]
+      .map(([t,l])=>`<button onclick="go('${t}')" aria-current="${String(t===tab)}">${l}</button>`).join('')}
+  else{nav.style.display='none';nav.innerHTML=''}
+  renderGate()}
+
+function viewHall(){
+  const st=houseStats();
+  if(!S.roster.length)return `<h2>The hall stands empty</h2>
+    <p class="hint">No one has been sorted into a house yet.</p>
+    <button class="btn ghost" onclick="${canEdit()?"go('team')":"go('pin')"}">${canEdit()?'Set up the team':'Managers — sign in'}</button>
+    ${pastChampions()}`;
+  const rows=HOUSES.map(h=>st[h.id]).sort((a,b)=>b.pts-a.pts).map(s=>{const h=house(s.id);
+    return `<tr><td>${crest(h,15)}${s.id}</td><td class="num">${s.members}</td>
+    <td class="num" style="color:${h.color}">${n1(s.pts)}</td></tr>`}).join('');
+  const wk=mondayOf(todayISO()),w=weekStats(wk),lead=w.list[0],lh=house(lead.id);
+  const week=lead.pts?`<div class="card" style="display:flex;align-items:center;gap:12px;border-left:4px solid ${lh.color}">
+      ${crest(lh,28)}<div><div style="font-family:var(--display);font-weight:700;letter-spacing:.06em;font-size:15px;color:${lh.color}">${lead.id} lead the week</div>
+      <div class="by" style="margin-top:3px">${fmtLong(w.start)} – ${fmtLong(w.end)} · ${n1(lead.pts)} points so far</div></div></div>`
+    :`<div class="card"><span class="by">A new week — the hourglasses stand ready. First points take the lead.</span></div>`;
+  const lwStart=addDays(wk,-7),lw=weekStats(lwStart),champ=lw.list[0],chh=house(champ.id);
+  const runners=lw.list.slice(1).filter(x=>x.pts>0).map(x=>esc(x.id)+' '+n1(x.pts)).join(' · ');
+  const lastWeek=champ.pts?`<h2 style="margin-top:26px">Last week</h2>
+    <div class="card" style="border-left:4px solid ${chh.color};display:flex;align-items:center;gap:13px">
+      ${crest(chh,36)}
+      <div style="flex:1;min-width:0">
+        <div style="font-family:var(--mono);font-size:8.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-soft)">Champions of the week</div>
+        <div style="font-family:var(--title);font-size:20px;line-height:1.25;color:${chh.color}">${esc(champ.id)}</div>
+        <div class="by" style="margin-top:2px">${fmtLong(lw.start)} – ${fmtLong(lw.end)} · ${n1(champ.pts)} points${runners?'<br>'+runners:''}</div></div>
+      ${me?`<button class="tgl" style="flex:0 0 auto" onclick="openCert('${lwStart}')">Certificate</button>`:''}</div>`:'';
+  const nd=S.days.length||1,unit=S.days.some(d=>d.shift)?'shifts':'days';
+  const store=targetsList().map(t=>{const hit=S.days.filter(d=>d[t.k]).length;
+    return `<div style="margin-bottom:13px"><div class="prog-row" style="margin-top:0">
+      <span><b>${t.label}</b> — ${t.sub}</span><span>${hit}/${S.days.length} ${unit}</span></div>
+      <div class="bar"><i style="width:${(hit/nd*100).toFixed(0)}%;background:#1E5C3A"></i></div></div>`}).join('');
+  const svyPct=Math.min(((S.smgCount||0)/((S.smgTarget||0)||1))*100,100).toFixed(0);
+  const sashFirst=surveyReached()&&!window.__sashShown;
+  if(surveyReached())window.__sashShown=true;
+  const sash=surveyReached()?`<div class="sash ${sashFirst?'sash-in':''}">✦ Survey target reached — ${n1(S.smgReward||0)} points to every house ✦</div>`:'';
+  const surveys=(S.smgTarget||0)>0?`<h2 style="margin-top:26px">Customer surveys</h2>
+    <p class="hint">${surveyReached()?'The whole store did this together.':'Every completed survey counts for the whole store.'}</p>
+    <div class="card"><div class="prog-row" style="margin-top:0"><span><b>Surveys this term</b></span>
+      <span>${S.smgCount||0}/${S.smgTarget}</span></div>
+      <div class="bar"><i style="width:${svyPct}%;background:${surveyReached()?'#8A6A26':'#1E5C3A'}"></i></div></div>`:'';
+  return `${sash}<h2>This week</h2>${week}
+    ${lastWeek}
+    <h2 style="margin-top:26px">The term so far</h2>
+    <p class="hint">Ranked on what partners earn — target points from the shifts they work, plus deeds worth extra.${S.perCapita?' Scored per partner, so a bigger house has no advantage.':''}</p>
+    <div class="card"><table><tr><th>House</th><th style="text-align:right">Ptnr</th>
+      <th style="text-align:right">Points</th></tr>${rows}</table></div>
+    <h2 style="margin-top:26px">The houses</h2>
+    <div class="card">${HOUSES.map(h=>{const ppl=S.roster.filter(p=>p.house===h.id&&!p.left);
+      return `<div class="hcard"><div class="hh">${crest(h,17)}<span style="color:${h.color}">${h.id}</span></div>
+        ${ppl.length?ppl.map(p=>`<span class="chip">${esc(shortName(p))}</span>`).join(''):'<span class="by">nobody sorted yet</span>'}</div>`}).join('')}</div>
+    <h2 style="margin-top:26px">Deeds worth points</h2>
+    <p class="hint">Fixed for every house, so there are no favourites — and you need not be on till to earn them. Each house may grant ${S.maxExtraHouse} a week, at most ${S.maxExtraPartner} to any one partner.</p>
+    <div class="card">${extrasList().map(x=>`<div class="wk"><span class="nm">${esc(x.label)}</span>
+      <span class="num" style="flex:0 0 42px;font-family:var(--mono);font-weight:600;text-align:right">${x.pts}</span></div>`).join('')}</div>
+    ${surveys}
+    ${S.days.length?`<h2 style="margin-top:26px">The store's own goals</h2>
+    <p class="hint">Targets hit on a shift earn points for every partner who worked it — the whole crew shares the win.</p>
+    <div class="card">${store}</div>`:''}
+    ${pastChampions()}
+    <div class="seal">HC</div>
+    <p style="text-align:center;font-family:var(--mono);font-size:8.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-soft);margin:12px 0 0">Posted by order of the management</p>
+    ${me?'':`<p style="text-align:center;margin:20px 0 0"><button class="quiet" onclick="go('pin')">Manager sign in</button></p>`}`}
+function pastChampions(){
+  if(!S.archive.length)return '';
+  return `<h2 style="margin-top:26px">Past champions</h2>`+
+  `<div class="card">${S.archive.slice().reverse().map(a=>`<div class="wk">
+    <span class="nm" style="font-family:var(--display);font-weight:700">${crest(house(a.winner),16)}${esc(a.winner)}</span>
+    <span class="by" style="flex:0 0 auto">${fmtDate(a.start)} – ${fmtDate(a.end)} · ${n1(a.results[0].pts)} pts</span></div>`).join('')}</div>`}
+function viewPin(){return `<p style="margin:0 0 16px"><button class="quiet" onclick="go('hall')">← Back to the poster</button></p>`+lockPanel('Manager sign in')}
+
+function viewLog(){
+  if(!canEdit())return lockPanel('Award points');
+  if(!S.roster.length)return `${undoBar()}<h2>The shift review</h2>
+    <p class="hint">Points go to a name on the roll — sort the team first.</p>
+    <button class="btn" onclick="go('team')">Set up the team</button>`;
+  let groups='';
+  HOUSES.forEach(h=>{const ppl=S.roster.filter(p=>p.house===h.id&&!p.left&&dayDraft.crew.includes(p.id));if(!ppl.length)return;
+    const left=Math.max(0,(S.maxExtraHouse||0)-extrasUsed(mondayOf(dayDraft.date),h.id,null));
+    groups+=`<div class="hgroup">${crest(h,17)}<span style="color:${h.color}">${h.id}</span>
+      <span style="margin-left:auto;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;color:var(--ink-soft);font-weight:500;text-transform:none">${left} extra${left===1?'':'s'} left this week</span></div>
+      <div class="card" style="padding:10px 13px">
+      ${ppl.map(p=>`<div class="wk"><span class="nm">${esc(p.name)}</span>
+        <select id="ex-${p.id}" style="width:172px;flex:0 0 172px;padding:7px 5px;font-size:12px" aria-label="Deed for ${esc(p.name)}">
+          <option value="">No deed</option>
+          ${extrasList().map(x=>`<option value="${esc(x.id)}">${esc(x.label)} · ${x.pts}</option>`).join('')}</select></div>`).join('')}</div>`});
+  return `${undoBar()}<h2>The shift review</h2>
+  <p class="hint">The whole shift on one page — tick what the store hit, choose who was on, add any deeds. One press records it all.</p>
+  <div class="card"><div class="field" style="margin-bottom:12px"><label>Date</label>
+    <input type="date" value="${dayDraft.date}" onchange="setDayDate(this.value)"></div>
+    <div class="seg" style="margin-bottom:12px">
+      <button class="${dayDraft.shift==='am'?'on':''}" onclick="setDayShift('am')">Morning</button>
+      <button class="${dayDraft.shift==='pm'?'on':''}" onclick="setDayShift('pm')">Afternoon</button></div>
+    </div>
+  <h2 style="margin-top:22px">Store targets</h2>
+  <p class="hint">Every target the shift hits earns ${S.storeHitPoints} points for each partner on the crew below.</p>
+  <div class="card">${targetsList().map(t=>`<div class="tgt ${dayDraft[t.k]?'on':''}" onclick="toggleT('${t.k}')">
+    <div class="box">✓</div><div class="lb"><b>${t.label}</b><i>${t.sub}</i></div></div>`).join('')}</div>
+  <h2 style="margin-top:22px">Customer surveys</h2>
+  <p class="hint">${S.smgCount||0} of ${S.smgTarget} this term${surveyReached()?' — target met, every house shares the reward.':'. Add responses as they arrive.'}</p>
+  <div class="card"><div class="row">
+    <input type="number" min="1" id="smgAdd" placeholder="How many new responses?" onkeydown="if(event.key==='Enter')addSurveys()">
+    <button class="btn" style="flex:0 0 84px;padding:11px" onclick="addSurveys()">Add</button></div></div>
+  <h2 style="margin-top:22px">Who was on</h2>
+  <p class="hint">Tap the partners who worked this shift — they share the shift's target points, and any deeds go below. Everyone selects the whole team.</p>
+  <div class="card">
+    ${S.roster.filter(p=>!p.left).map(p=>{const on=dayDraft.crew.includes(p.id),h=house(p.house);
+      return `<button class="chip" style="${on?'background:'+h.color+';border-color:'+h.color+';color:var(--parch)':''}"
+        onclick="toggleCrew('${p.id}')" aria-pressed="${on}">${esc(shortName(p))}</button>`}).join('')}
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost" onclick="crewAll()">Everyone</button>
+      <button class="btn ghost" onclick="crewNone()">Clear</button></div></div>
+  ${dayDraft.crew.length?`<h2 style="margin-top:22px">Partner points</h2>
+  <p class="hint">Deeds worth extra points, at fixed amounts — at most ${S.maxExtraPartner} per partner and ${S.maxExtraHouse} per house a week.</p>
+  ${groups}`:`<p class="note" style="margin:2px 0 15px">No partners chosen — targets will be tracked, but target points need a crew.</p>`}
+  <button class="btn" onclick="saveShift()">Record this shift</button>
+  ${S.entries.length?`<h2 style="margin-top:26px">Recent awards</h2>
+  <p class="hint">Every award records who made it. Tap × to take one back.</p>
+  <div class="card"><table>${S.entries.slice().reverse().slice(0,10).map(e=>`<tr>
+    <td style="font-family:var(--mono);font-size:10.5px;color:var(--ink-soft)">${fmtDate(e.date)}</td>
+    <td>${crest(house(e.house),14)}${esc(e.name)}${e.reason?'<br><span class="by">'+esc(e.reason)+'</span>':''}<br><span class="by">by ${esc(e.by||'—')}</span></td>
+    <td class="num">+${entryPts(e)}</td>
+    <td style="width:28px"><button class="x" onclick="delEntry('${e.id}')" aria-label="Remove">×</button></td></tr>`).join('')}</table></div>`:''}`}
+
+function viewTeam(){
+  if(!canEdit())return lockPanel('The Team');
+  const groups=HOUSES.map(h=>{
+    const ppl=S.roster.filter(p=>p.house===h.id&&!p.left);
+    return `<div class="hgroup">${crest(h,17)}<span style="color:${h.color}">${h.id}</span>
+      <span style="margin-left:auto;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;color:var(--ink-soft);font-weight:500;text-transform:none">${ppl.length} partner${ppl.length===1?'':'s'}</span></div>
+    <div class="card" style="padding:${ppl.length?'4px 15px':'13px 15px'}">
+      ${ppl.length?ppl.map(p=>`<div class="wk" style="gap:7px">
+        <span class="nm">${esc(p.name)}</span>
+        <select style="flex:0 0 122px;width:122px;padding:7px 5px;font-size:12px"
+          onchange="setHouse('${p.id}',this.value)" aria-label="Move ${esc(p.name)} to another house">
+          ${HOUSES.map(x=>`<option ${x.id===p.house?'selected':''}>${x.id}</option>`).join('')}</select>
+        <button class="x" style="flex:0 0 24px;color:var(--parch-3);font-size:15px" onclick="delPartner('${p.id}')" aria-label="Remove ${esc(p.name)} from the team" title="Remove from the team">×</button></div>`).join('')
+      :'<span class="by">nobody here yet — use the house menu on any row to move someone in</span>'}</div>`}).join('');
+  return `${undoBar()}<h2>The team</h2>
+  <p class="hint">Everyone playing, grouped by house. Use the menu on a row to move someone; their SMGs and extras always score for the house they are in.</p>
+  <div class="card"><div class="field" style="margin-bottom:9px"><label>New arrival</label>
+    <div class="row"><input type="text" id="newName" placeholder="Name" onkeydown="if(event.key==='Enter')addPartner()">
+    <select id="newHouse" style="flex:0 0 128px" aria-label="House for the new arrival">
+      <option value="">Smallest house</option>${HOUSES.map(h=>`<option>${h.id}</option>`).join('')}</select></div></div>
+    <button class="btn" onclick="addPartner()">Add to the team</button></div>
+  ${groups}
+  <p class="note" style="margin:2px 0 13px">The small <b>×</b> removes someone when they leave; points they earned stay in this term's maths until it ends, so removing never skews the scores.</p>
+  <button class="btn ghost" onclick="sortHat()">Shuffle everyone into fresh houses</button>
+  <p class="note">Deals everyone into even houses. Usually once, at the start of each term.</p>`}
+
+function viewMgrs(){
+  if(!canEdit())return lockPanel('The Managers');
+  return `${undoBar()}<h2>Managers</h2>
+  <p class="hint">${canManage()
+    ?(superSet()?'As store manager, only you can change passwords and access here.'
+      :'No store manager named yet — tap ☆ next to whoever runs the store. Until then, any manager can change these.')
+    :'Only the store manager can change passwords or manager access.'}</p>
+  ${mgrList()}
+  ${canManage()&&superSet()?`<p class="note" style="margin:2px 0 13px">★ marks the store manager. Tap a ☆ to hand the role to someone else.<br>Passwords are readable here so you can remind anyone who forgets. One showing "set — retype to show" was stored scrambled by an earlier version — its old password still works; type a new one to make it visible.</p>`:''}
+  ${canManage()?mgrForm():''}
+  ${canManage()?targetsEditor():''}
+  ${canManage()?extrasEditor():''}
+  <h2 style="margin-top:28px">The rules of points</h2>
+  <div class="card">
+    <div class="field"><label>Pts / store target — earned by each partner on the shift</label>
+      <input type="number" min="0" value="${S.storeHitPoints}" onchange="setCfg('storeHitPoints',this.value)"></div>
+    <div class="field"><label>Poster pin — the team's shared key; blank switches the gate off</label>
+      <input type="text" value="${esc(S.posterPin||'')}" maxlength="8" autocomplete="off"
+        ${canManage()?'':'disabled title="Set by the store manager"'} onchange="setCfg('posterPin',this.value.trim())"></div>
+    <div class="row"><div class="field"><label>Survey target / term</label>
+      <input type="number" min="0" value="${S.smgTarget}" ${canManage()?'':'disabled title="Set by the store manager"'} onchange="setCfg('smgTarget',this.value)"></div>
+      <div class="field"><label>Pts to every house at target</label>
+      <input type="number" min="0" value="${S.smgReward}" ${canManage()?'':'disabled title="Set by the store manager"'} onchange="setCfg('smgReward',this.value)"></div></div>
+    <div class="row"><div class="field"><label>Extras / partner / week</label>
+      <input type="number" min="0" value="${S.maxExtraPartner}" onchange="setCfg('maxExtraPartner',this.value)"></div>
+      <div class="field"><label>Extras / house / week</label>
+      <input type="number" min="0" value="${S.maxExtraHouse}" onchange="setCfg('maxExtraHouse',this.value)"></div></div>
+    <div class="field"><label>Number of houses</label>
+      <select onchange="setCfg('houseCount',this.value)">${[2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===(S.houseCount||4)?'selected':''}>${n} — ${ALL_HOUSES.slice(0,n).map(h=>h.id.split(' ')[0]).join(', ')}</option>`).join('')}</select></div>
+    <div class="tgt ${S.perCapita?'on':''}" onclick="togglePC()" style="border-top:1px solid var(--parch-3)">
+      <div class="box">✓</div><div class="lb"><b>Score per partner</b><i>Fair when houses differ in size</i></div></div>
+    <p class="note" style="margin-top:10px">Shared by every house and every manager — change them for everyone at once. Every target a shift hits earns Pts / store target for each partner who worked it, scored to their own houses like any other points; set to 0 to track targets without scoring them.</p></div>`}
+
+function viewRotation(){
+  if(!canEdit())return lockPanel('The Cup');
+  const st=houseStats(),l=HOUSES.map(h=>st[h.id]).sort((a,b)=>b.pts-a.pts)[0];
+  return `${undoBar()}<h2>The Cup</h2>
+  <p class="hint">The competition itself — its dates, its weekly certificates, and the ceremony that ends a term: the winner engraved, the hourglasses emptied, the houses re-sorted.</p>
+  <div class="card">
+    <div class="field"><label>Term began</label><input type="date" value="${S.cupStart}" onchange="setCfg('cupStart',this.value)"></div>
+    <div class="field" style="margin-bottom:0"><label>Term ends</label><input type="date" value="${S.rotationDate||''}" onchange="setCfg('rotationDate',this.value)"></div></div>
+  <div class="card"><p class="hint" style="margin:0 0 13px">Leading: <strong>${l.pts?l.id:'nobody yet'}</strong>${l.pts?' on '+n1(l.pts)+' points':''}.</p>
+    <button class="btn ghost" onclick="sortHat()">Re-sort the houses only</button>
+    <button class="btn danger" style="margin-top:9px" onclick="closeCup()">End the term</button></div>
+  <h2 style="margin-top:28px">This week</h2>
+  ${(()=>{const wk=mondayOf(todayISO()),w=weekStats(wk),win=w.list[0];
+    const prev=weeksWithData().filter(x=>x!==wk).slice(0,6);
+    return `<p class="hint">${fmtLong(w.start)} – ${fmtLong(w.end)}. ${win.pts?'Leading: <strong>'+win.id+'</strong> on '+n1(win.pts)+' points.':'Nothing recorded yet this week.'}</p>
+    <div class="card">
+      <table>${w.list.map(x=>`<tr><td>${crest(house(x.id),15)}${x.id}</td>
+        <td class="num">${n1(x.pts)}</td></tr>`).join('')}</table>
+      <button class="btn" style="margin-top:13px" onclick="openCert('${wk}')">Open this week's certificate</button>
+    </div>
+    ${prev.length?`<p class="hint">Earlier weeks</p><div class="card">${prev.map(k=>{
+      const pw=weekStats(k);return `<div class="wk"><span class="nm">${fmtLong(k)} – ${fmtLong(addDays(k,6))} · ${esc(pw.list[0].id)}</span>
+      <button class="tgl" style="flex:0 0 auto" onclick="openCert('${k}')">Certificate</button></div>`}).join('')}</div>`:''}`})()}
+  <h2 style="margin-top:28px">Backup</h2>
+  <p class="hint">Everything lives in one place and one reset wipes it. Take a copy before each term ends, and before anyone presses Reset.</p>
+  <div class="card">
+    <button class="btn ghost" onclick="downloadBackup()">Download a backup file</button>
+    <div class="field" style="margin:13px 0 9px"><label>Or copy this text somewhere safe</label>
+      <textarea id="bkOut" rows="3" readonly onclick="this.select()">${esc(JSON.stringify(S))}</textarea></div>
+    ${canManage()?`<div class="field" style="margin-bottom:9px"><label>Restore — paste a backup here</label>
+      <textarea id="bkIn" rows="3" placeholder="Paste backup text"></textarea></div>
+    <button class="btn danger" onclick="restoreBackup()">Restore from this text</button>`
+    :`<p class="note" style="margin:0">Restoring a backup is done by the store manager.</p>`}</div>
+  ${canManage()?`<h2 style="margin-top:28px">Start over</h2>
+  <p class="hint">Wipes everything — partners, points, days, managers and passwords — and puts the board back to its first-run state. Only you and the admin account can do this.</p>
+  <button class="btn danger" onclick="resetAll()">Reset everything</button>`:''}`}
+
+/* ---------- actions ---------- */
+function go(t){tab=t;render();window.scrollTo({top:0,behavior:'smooth'})}
+function grabShiftInputs(){const o={};
+  S.roster.forEach(p=>{
+    const el=document.getElementById('ex-'+p.id);if(el&&el.value)o['ex-'+p.id]=el.value});
+  ['pw','who2','mName','newName','newHouse','exLabel','exPts','tgLabel','tgSub','smgAdd','bkIn'].forEach(id=>{
+    const el=document.getElementById(id);if(el&&el.value)o[id]=el.value});
+  return o}
+function putShiftInputs(o){Object.keys(o).forEach(k=>{
+  const el=document.getElementById(k);if(el)el.value=o[k]})}
+function extrasUsed(weekStart,houseId,name){
+  const end=addDays(weekStart,6);
+  return S.entries.filter(e=>(e.extra||0)>0&&e.date>=weekStart&&e.date<=end
+    &&(!houseId||e.house===houseId)&&(!name||e.name===name)).length}
+function extrasEditor(){
+  const rows=extrasList().map(x=>`<div class="wk" style="gap:6px">
+    <input type="text" value="${esc(x.label)}" style="flex:1;padding:8px 9px;font-size:13.5px"
+      onchange="setExtraCfg('${esc(x.id)}','label',this.value)" aria-label="Deed name">
+    <input type="number" min="0" value="${x.pts}" style="flex:0 0 60px;padding:8px 4px;text-align:center;font-family:var(--mono)"
+      onchange="setExtraCfg('${esc(x.id)}','pts',this.value)" aria-label="Points for ${esc(x.label)}">
+    <button class="x" style="flex:0 0 26px" onclick="delExtra('${esc(x.id)}')" aria-label="Remove ${esc(x.label)}">×</button></div>`).join('');
+  return `<h2 style="margin-top:28px">Deeds worth extra points</h2>
+  <p class="hint">Your store's own list — every manager awards from it at the amounts you set. Changing it never rewrites points already given.</p>
+  <div class="card" style="padding:10px 13px">${rows||'<span class="by">no deeds yet — add one below</span>'}</div>
+  <div class="card"><div class="row">
+    <input type="text" id="exLabel" placeholder="New deed" onkeydown="if(event.key==='Enter')addExtraDeed()">
+    <input type="number" min="0" id="exPts" placeholder="Pts" style="flex:0 0 70px"></div>
+  <button class="btn ghost" style="margin-top:9px" onclick="addExtraDeed()">Add deed</button></div>`}
+function targetsEditor(){
+  const rows=targetsList().map(t=>`<div class="wk" style="gap:6px">
+    <input type="text" value="${esc(t.label)}" style="flex:1;padding:8px 9px;font-size:13.5px"
+      onchange="setTargetCfg('${esc(t.k)}','label',this.value)" aria-label="Target name">
+    <input type="text" value="${esc(t.sub||'')}" placeholder="detail" style="flex:0 0 122px;padding:8px 7px;font-size:12px"
+      onchange="setTargetCfg('${esc(t.k)}','sub',this.value)" aria-label="Detail for ${esc(t.label)}">
+    <button class="x" style="flex:0 0 26px" onclick="delTarget('${esc(t.k)}')" aria-label="Remove ${esc(t.label)}">×</button></div>`).join('');
+  return `<h2 style="margin-top:28px">Store targets</h2>
+  <p class="hint">The daily numbers each shift ticks — every hit earns Pts / store target for the whole crew. Changing this list never touches points already given.</p>
+  <div class="card" style="padding:10px 13px">${rows||'<span class="by">no targets yet — add one below</span>'}</div>
+  <div class="card"><div class="row">
+    <input type="text" id="tgLabel" placeholder="New target" onkeydown="if(event.key==='Enter')addTarget()">
+    <input type="text" id="tgSub" placeholder="Detail, e.g. £452 for the day" style="flex:0 0 148px"></div>
+  <button class="btn ghost" style="margin-top:9px" onclick="addTarget()">Add target</button></div>`}
+function setTargetCfg(k,f,v){
+  if(!canManage())return;
+  const t=(S.targets||[]).find(x=>x.k===k);if(!t)return;
+  v=String(v).trim();
+  if(f==='label'){if(!v){render();return}t.label=v}else t.sub=v;
+  save();render()}
+function delTarget(k){
+  if(!canManage())return;
+  const t=(S.targets||[]).find(x=>x.k===k);if(!t)return;
+  askConfirm('Remove "'+t.label+'" from the store targets? Shifts already recorded keep their ticks, and points already given are never changed.',()=>{
+    snap();S.targets=S.targets.filter(x=>x.k!==k);save();render();toast('Target removed',1)})}
+function addTarget(){
+  if(!canManage())return;
+  const l=((document.getElementById('tgLabel')||{}).value||'').trim();
+  const s=((document.getElementById('tgSub')||{}).value||'').trim();
+  if(!l){toast('Give the target a name');return}
+  if(!Array.isArray(S.targets))S.targets=[];
+  S.targets.push({k:'t'+uid(),label:l,sub:s});
+  save();render();toast('"'+l+'" added to the store targets')}
+function setExtraCfg(id,k,v){
+  if(!canManage())return;
+  const x=(S.extras||[]).find(e=>e.id===id);if(!x)return;
+  if(k==='pts')x.pts=Math.max(0,Number(v)||0);
+  else{v=String(v).trim();if(!v){render();return}x.label=v}
+  save();render()}
+function delExtra(id){
+  if(!canManage())return;
+  const x=(S.extras||[]).find(e=>e.id===id);if(!x)return;
+  askConfirm('Remove "'+x.label+'" from the deeds list? Points already awarded for it are kept.',()=>{
+    snap();S.extras=S.extras.filter(e=>e.id!==id);save();render();toast('Deed removed',1)})}
+function addSurveys(){
+  if(!me)return;
+  const el=document.getElementById('smgAdd'),n=Math.floor(Number(el&&el.value)||0);
+  if(n<=0){toast('How many responses came in?');if(el)el.focus();return}
+  snap();
+  const before=S.smgCount||0;S.smgCount=before+n;
+  save();render();
+  if(!((S.smgTarget||0)>0&&before>=S.smgTarget)&&surveyReached())
+    toast('Survey target reached — '+n1(S.smgReward||0)+' points to every house!',1);
+  else toast(n+' response'+(n===1?'':'s')+' added — '+(S.smgCount)+' of '+S.smgTarget,1)}
+function addExtraDeed(){
+  if(!canManage())return;
+  const l=((document.getElementById('exLabel')||{}).value||'').trim();
+  const p=Math.max(0,Number((document.getElementById('exPts')||{}).value)||0);
+  if(!l){toast('Give the deed a name');return}
+  if(!p){toast('Give it some points');return}
+  if(!Array.isArray(S.extras))S.extras=[];
+  S.extras.push({id:uid(),label:l,pts:p});
+  save();render();toast('"'+l+'" added at '+p+' points')}
+function setCfg(k,v){S[k]=(typeof DEFAULT[k]==='number')?Math.max(0,Number(v)||0):v;
+  if(k==='houseCount')syncHouses();
+  save();render()}
+function togglePC(){S.perCapita=!S.perCapita;save();render()}
+function toggleT(k){const keep=grabShiftInputs();dayDraft[k]=!dayDraft[k];render();putShiftInputs(keep)}
+function loadDayTicks(){
+  const e=S.days.find(d=>d.date===dayDraft.date&&(d.shift||'')===dayDraft.shift);
+  dayDraft.crew=e&&e.crew?e.crew.filter(id=>S.roster.some(p=>p.id===id)):[];
+  targetsList().forEach(t=>dayDraft[t.k]=e?!!e[t.k]:false)}
+function setDayDate(v){const keep=grabShiftInputs();dayDraft.date=v;loadDayTicks();render();putShiftInputs(keep)}
+function setDayShift(s){const keep=grabShiftInputs();dayDraft.shift=s;loadDayTicks();render();putShiftInputs(keep)}
+function toggleCrew(id){const keep=grabShiftInputs();
+  const i=dayDraft.crew.indexOf(id);
+  if(i>=0)dayDraft.crew.splice(i,1);else dayDraft.crew.push(id);
+  render();putShiftInputs(keep)}
+function crewAll(){const keep=grabShiftInputs();
+  dayDraft.crew=S.roster.filter(p=>!p.left).map(p=>p.id);
+  render();putShiftInputs(keep)}
+function crewNone(){dayDraft.crew=[];render()}
+function saveShift(){
+  if(!me)return;
+  const d=dayDraft.date,wk=mondayOf(d);
+  const tHits=targetsList().filter(t=>dayDraft[t.k]).length;
+  const adds=[];
+  S.roster.forEach(p=>{
+    if(p.left||!dayDraft.crew.includes(p.id))return;
+    const x=extrasList().find(e=>e.id===((document.getElementById('ex-'+p.id)||{}).value||''));
+    if(!x&&!tHits)return;
+    adds.push({p,x})});
+  const houseAdd={},partnerAdd={};
+  adds.forEach(a=>{if(!a.x)return;
+    houseAdd[a.p.house]=(houseAdd[a.p.house]||0)+1;
+    partnerAdd[a.p.name]=(partnerAdd[a.p.name]||0)+1});
+  for(const nm in partnerAdd)
+    if(extrasUsed(wk,null,nm)+partnerAdd[nm]>S.maxExtraPartner){
+      toast(nm+' would go over '+S.maxExtraPartner+' extras this week');return}
+  for(const hId in houseAdd)
+    if(extrasUsed(wk,hId,null)+houseAdd[hId]>S.maxExtraHouse){
+      toast(hId+' would go over '+S.maxExtraHouse+' extras this week');return}
+  snap();
+  const i=S.days.findIndex(x=>x.date===d&&(x.shift||'')===dayDraft.shift);
+  const rec={id:i>=0?S.days[i].id:uid(),date:d,shift:dayDraft.shift,crew:dayDraft.crew.slice(),by:me.name};
+  targetsList().forEach(t=>rec[t.k]=!!dayDraft[t.k]);
+  if(i>=0)S.days[i]=rec;else S.days.push(rec);
+  let n=0,pts=0;const gains={};
+  adds.forEach(a=>{
+    const reason=[a.x?a.x.label:null,
+      tHits?'shift hit '+tHits+' target'+(tHits===1?'':'s'):null].filter(Boolean).join(' · ');
+    const e={id:uid(),date:d,name:a.p.name,house:a.p.house,smg:0,
+      extra:a.x?a.x.pts:0,tgt:tHits,reason,by:me.name};
+    S.entries.push(e);n++;pts+=entryPts(e);
+    gains[a.p.house]=(gains[a.p.house]||0)+entryPts(e)});
+  if(S.days.length===1&&S.entries.length===n)S.cupStart=d;
+  save();render();
+  const won=Object.keys(gains);
+  won.forEach(h=>pour(h,gains[h]));
+  if(won.length)window.scrollTo({top:0,behavior:reducedMotion()?'auto':'smooth'});
+  toast(shiftName(rec.shift)+' recorded'
+    +(n?' — '+pts+' pts across '+n+' partner'+(n===1?'':'s'):(tHits?' — targets tracked, no crew chosen':'')),1)}
+function delEntry(id){if(!canEdit())return;
+  const e=S.entries.find(x=>x.id===id);if(!e)return;
+  askConfirm('Take back '+e.name+"'s points from "+fmtDate(e.date)+'?',()=>{
+    snap();tomb([id]);S.entries=S.entries.filter(x=>x.id!==id);save();render();toast('Points taken back',1)})}
+function smallestHouse(){const c={};HOUSES.forEach(h=>c[h.id]=S.roster.filter(p=>p.house===h.id).length);
+  return HOUSES.slice().sort((a,b)=>c[a.id]-c[b.id])[0].id}
+function addPartner(){
+  const el=document.getElementById('newName'),name=el.value.trim();
+  if(!name){el.focus();return}
+  const dup=S.roster.find(p=>p.name.toLowerCase()===name.toLowerCase());
+  if(dup){
+    if(dup.left){dup.left=false;save();render();toast(dup.name+' is back on the team');return}
+    toast('Already on the team');return}
+  const chosen=((document.getElementById('newHouse')||{}).value)||'';
+  const h=chosen||smallestHouse();
+  S.roster.push({id:uid(),name,house:h});
+  S.roster.sort((a,b)=>a.name.localeCompare(b.name));
+  save();render();const n=document.getElementById('newName');if(n)n.focus();toast(name+' joins '+h)}
+function delPartner(id){if(!canEdit())return;
+  const p=S.roster.find(x=>x.id===id);if(!p)return;
+  askConfirm('Remove '+p.name+' from the team?',()=>{
+    snap();
+    if(S.entries.some(e=>e.name===p.name)){
+      p.left=true;
+      save();render();toast(p.name+' removed — their points stay in the maths until term end',1)}
+    else{
+      tomb([id]);S.roster=S.roster.filter(x=>x.id!==id);
+      save();render();toast(p.name+' removed',1)}})}
+function toggleTill(id){
+  const p=S.roster.find(x=>x.id===id);if(!p)return;
+  p.till=!p.till;save();render()}
+function setHouse(id,h){const p=S.roster.find(x=>x.id===id);if(p){p.house=h;save();render()}}
+function sortHat(){
+  if(!S.roster.length){toast('Nobody to sort yet');return}
+  askConfirm('Let the Sorting Hat place everyone anew?',()=>{
+  snap();
+  const n=HOUSES.length,mix=a=>a.slice().sort(()=>Math.random()-.5);
+  let i=0;
+  mix(S.roster.filter(p=>p.till)).forEach(p=>{p.house=HOUSES[i++%n].id});
+  mix(S.roster.filter(p=>!p.till)).forEach(p=>{p.house=HOUSES[i++%n].id});
+  S.roster.sort((a,b)=>a.name.localeCompare(b.name));
+  save();render();toast('The hat has spoken',1)})}
+function downloadBackup(){
+  try{
+    const name='house-cup-'+todayISO()+'.json';
+    const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+    toast('Backup downloaded')
+  }catch(e){toast('Download blocked — copy the text below instead')}}
+function restoreBackup(){
+  if(!canManage()){toast('Only the store manager can restore the board');return}
+  const t=(document.getElementById('bkIn')||{}).value||'';
+  if(!t.trim()){toast('Paste a backup first');return}
+  let d;try{d=JSON.parse(t)}catch(e){toast('That does not look like a backup');return}
+  if(!d||typeof d!=='object'||!('roster' in d)){toast('That does not look like a backup');return}
+  askConfirm('Restore this backup? It replaces what is on the board now, for everyone.',()=>{
+    snap();
+    S=Object.assign(freshState(),d);
+    me=null;syncHouses();save();render();toast('Backup restored',1)})}
+function resetAll(){
+  if(!canManage()){toast('Only the store manager can reset the board');return}
+  askConfirm('Reset everything? Every partner, point, day, manager and password is wiped — for everyone using this board, not just you. This cannot be undone after the next change.',()=>{
+  snap();
+  const fresh=freshState();
+  const reseeded=fresh.managers.map(x=>x.id).concat(fresh.roster.map(x=>x.id));
+  const gone=[].concat(S.entries.map(x=>x.id),S.days.map(x=>x.id),S.roster.map(x=>x.id),
+    S.managers.map(x=>x.id),(S.archive||[]).map(x=>x.id)).filter(id=>reseeded.indexOf(id)<0);
+  S=fresh;tomb(gone);me=null;tab='hall';
+  dayDraft={date:todayISO(),shift:(new Date().getHours()<15?'am':'pm'),crew:[]};
+  syncHouses();save();render();toast('Everything reset',1)})}
+function closeCup(){
+  if(!S.entries.length&&!S.days.length){toast('Nothing recorded this term');return}
+  askConfirm('End the term? Everything empties and the result is engraved.',()=>{
+  snap();
+  const st=houseStats();
+  const results=HOUSES.map(h=>st[h.id]).sort((a,b)=>b.pts-a.pts).map(s=>({id:s.id,pts:s.pts,smg:s.smg}));
+  S.archive.push({id:uid(),winner:results[0].id,start:S.cupStart,end:todayISO(),results});
+  tomb(S.entries.map(e=>e.id).concat(S.days.map(d=>d.id),S.roster.filter(p=>p.left).map(p=>p.id)));
+  S.roster=S.roster.filter(p=>!p.left);
+  S.entries=[];S.days=[];S.smgCount=0;S.cupStart=todayISO();S.rotationDate='';
+  save();tab='hall';render();toast(results[0].id+' wins the House Cup!',1)})}
+
+setInterval(poll,20000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll()});
+document.getElementById('storeName').onchange=e=>{if(!me)return;S.store=e.target.value.trim();save()};
+load();
+</script>
+</body>
+</html>
