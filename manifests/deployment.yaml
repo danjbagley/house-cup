@@ -27,7 +27,11 @@ spec:
                     values: [devious]
       containers:
         - name: house-cup
-          image: djbagley/house-cup:1.0.0   # <-- EDIT to your actual registry path
+          # docker.io/djbagley/house-cup (private). Confirmed against the
+          # running deployment, so the placeholder comment is resolved.
+          # Never re-push an existing tag — bump it. Reusing 1.0.0 is how
+          # three different builds of this app became indistinguishable.
+          image: djbagley/house-cup:1.1.0
           imagePullPolicy: Always
           ports: [{ containerPort: 8080 }]
           env:
