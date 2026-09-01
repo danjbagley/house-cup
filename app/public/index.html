@@ -753,11 +753,14 @@ function mgrList(){
       <span style="flex:0 0 26px;text-align:center;font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)">SM</span>
       <span style="flex:0 0 96px;text-align:center;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)">Password</span>
       <span style="flex:0 0 26px"></span></div>
-    ${S.managers.map(m=>`<div class="wk" style="gap:6px">
+    ${/* admin is a maintenance account with full powers, not one of the
+          store's managers, so it is not listed as one. It stays selectable
+          on the sign-in screen: the handover makes it the way back in when
+          the store manager is locked out, so hiding it there would remove
+          the only recovery route. Still unremovable, still ⚙ elsewhere. */
+      S.managers.filter(m=>!isAdmin(m)).map(m=>`<div class="wk" style="gap:6px">
       <span class="nm">${esc(m.name)}</span>
-      ${isAdmin(m)
-        ?`<span style="flex:0 0 26px;text-align:center;color:var(--ink-soft);font-size:13px;line-height:1" title="Maintenance account" aria-label="Maintenance account">⚙</span>`
-        :isSuper(m)
+      ${isSuper(m)
         ?`<span style="flex:0 0 26px;text-align:center;color:var(--candle-dim);font-size:15px;line-height:1" title="Store manager" aria-label="Store manager">★</span>`
         :`<button class="x" style="flex:0 0 26px;color:var(--ink-soft)" onclick="makeSuper('${m.id}')" aria-label="Make ${esc(m.name)} the store manager" title="Make store manager">☆</button>`}
       <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
@@ -1081,15 +1084,13 @@ function viewRotation(){
     ${prev.length?`<p class="hint">Earlier weeks</p><div class="card">${prev.map(k=>{
       const pw=weekStats(k);return `<div class="wk"><span class="nm">${fmtLong(k)} – ${fmtLong(addDays(k,6))} · ${esc(pw.list[0].id)}</span>
       <button class="tgl" style="flex:0 0 auto" onclick="openCert('${k}')">Certificate</button></div>`}).join('')}</div>`:''}`})()}
-  <h2 style="margin-top:28px">Backup</h2>
-  <p class="hint">Everything lives in one place and one reset wipes it. Take a copy before each term ends, and before anyone presses Reset.</p>
+  <h2 style="margin-top:28px">Restore</h2>
+  <p class="hint">Backups now take themselves — every night, kept for six months — so there is nothing to do here day to day. If something ever needs putting back, ask for the backup file and paste it in below.</p>
   <div class="card">
-    <button class="btn ghost" onclick="downloadBackup()">Download a backup file</button>
-    <div class="field" style="margin:13px 0 9px"><label>Or copy this text somewhere safe</label>
-      <textarea id="bkOut" rows="3" readonly onclick="this.select()">${esc(JSON.stringify(S))}</textarea></div>
-    ${canManage()?`<div class="field" style="margin-bottom:9px"><label>Restore — paste a backup here</label>
+    ${canManage()?`<div class="field" style="margin-bottom:9px"><label>Paste a backup here</label>
       <textarea id="bkIn" rows="3" placeholder="Paste backup text"></textarea></div>
-    <button class="btn danger" onclick="restoreBackup()">Restore from this text</button>`
+    <button class="btn danger" onclick="restoreBackup()">Restore from this text</button>
+    <p class="note" style="margin:10px 0 0">This replaces the whole board, for everyone.</p>`
     :`<p class="note" style="margin:0">Restoring a backup is done by the store manager.</p>`}</div>
   ${canManage()?`<h2 style="margin-top:28px">Start over</h2>
   <p class="hint">Wipes everything — partners, points, days, managers and passwords — and puts the board back to its first-run state. Only you and the admin account can do this.</p>
@@ -1361,15 +1362,6 @@ function sortHat(){
   mix(S.roster.filter(p=>!p.till)).forEach(p=>{p.house=HOUSES[i++%n].id});
   S.roster.sort((a,b)=>a.name.localeCompare(b.name));
   save();render();toast('The hat has spoken',1)})}
-function downloadBackup(){
-  try{
-    const name='house-cup-'+todayISO()+'.json';
-    const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();
-    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
-    toast('Backup downloaded')
-  }catch(e){toast('Download blocked — copy the text below instead')}}
 function restoreBackup(){
   if(!canManage()){toast('Only the store manager can restore the board');return}
   const t=(document.getElementById('bkIn')||{}).value||'';
