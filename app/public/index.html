@@ -719,16 +719,26 @@ function whoBar(){document.getElementById('who').innerHTML=me
   ? `<button class="on" onclick="signOut()">${esc(me.name)} — sign out</button>`
   : ``}
 function signOut(){me=null;tab='hall';toast('Signed out');render()}
+async function matchPw(m,v){
+  if(!m||!v)return false;
+  try{if(m.pw&&(await sha256(v))===m.pw)return true}catch(e){}
+  return !!(m.pin&&m.pin===v)}
 async function trySignIn(){
   const id=((document.getElementById('who2')||{}).value)||'';
   const v=((document.getElementById('pw')||{}).value)||'';
+  if(!v){toast('Choose your name and enter your password');return}
   const m=S.managers.find(x=>x.id===id);
-  if(!m||!v){toast('Choose your name and enter your password');return}
-  let ok=false;
-  try{ok=!!m.pw&&(await sha256(v))===m.pw}catch(e){}
-  if(!ok&&m.pin&&m.pin===v)ok=true;
-  if(!ok){toast('That password is not recognised');return}
-  me=m;unlocked=true;tab='log';toast('Welcome, '+m.name);render()}
+  let who=null;
+  if(await matchPw(m,v))who=m;
+  /* admin is not offered in the list — it is a maintenance account, not one
+     of the store's managers. Its password still signs it in from whatever
+     name is selected, so the way back in when the store manager is locked
+     out (see the handover) survives without advertising the account. */
+  if(!who){
+    const a=S.managers.find(x=>isAdmin(x));
+    if(await matchPw(a,v))who=a}
+  if(!who){toast('That password is not recognised');return}
+  me=who;unlocked=true;tab='log';toast('Welcome, '+who.name);render()}
 function lockPanel(what){
   if(!S.managers.some(m=>m.pin||m.pw))return `<h2>Set up the managers</h2>
     <p class="hint">Give each manager a password of their own, and tap the star to name the store manager — from then on, only they can change passwords or manager access. As soon as anyone has a password, this page locks.</p>
@@ -737,7 +747,7 @@ function lockPanel(what){
   return `<h2>${what}</h2><p class="hint">Managers only. Baristas can see everything on the poster without signing in.</p>
   <div class="card"><div class="lock"><div class="ico">✧</div></div>
     <div class="field" style="margin-top:12px"><label>Your name</label>
-      <select id="who2">${S.managers.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select></div>
+      <select id="who2">${S.managers.filter(m=>!isAdmin(m)).map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select></div>
     <div class="field"><label>Password</label>
       <input type="password" id="pw" autocomplete="off" placeholder="••••••" onkeydown="if(event.key==='Enter')trySignIn()"></div>
     <button class="btn" onclick="trySignIn()">Sign in</button></div>
