@@ -333,7 +333,11 @@ function slug(s){return String(s).replace(/[^A-Za-z0-9_-]+/g,'-')}
 function houseSlot(id){
   if(HOUSES.some(h=>h.id===id))return id;
   const j=ALL_HOUSES.findIndex(h=>h.id===id);
-  return j<0?HOUSES[0].id:HOUSES[j%HOUSES.length].id}
+  /* An id that is not a house at all is returned unchanged, so st[...] misses
+     and the caller skips the record — which is what the code did before this
+     helper existed. Falling back to HOUSES[0] here credited every shift's
+     target hits to Gryffindor, because shift records carry no house field. */
+  return j<0?id:HOUSES[j%HOUSES.length].id}
 function syncHouses(){
   const n=Math.min(Math.max(S.houseCount||4,2),8);
   HOUSES=ALL_HOUSES.slice(0,n);
@@ -927,7 +931,7 @@ function pastChampions(){
   return `<h2 style="margin-top:26px">Past champions</h2>`+
   `<div class="card">${S.archive.slice().reverse().map(a=>`<div class="wk">
     <span class="nm" style="font-family:var(--display);font-weight:700">${crest(house(a.winner),16)}${esc(a.winner)}</span>
-    <span class="by" style="flex:0 0 auto">${fmtDate(a.start)} – ${fmtDate(a.end)} · ${n1(a.results[0].pts)} pts</span></div>`).join('')}</div>`}
+    <span class="by" style="flex:0 0 auto">${fmtDate(a.start)} – ${fmtDate(a.end)}${a.results&&a.results[0]?' · '+n1(a.results[0].pts)+' pts':''}</span></div>`).join('')}</div>`}
 function viewPin(){return `<p style="margin:0 0 16px"><button class="quiet" onclick="go('hall')">← Back to the poster</button></p>`+lockPanel('Manager sign in')}
 
 function viewLog(){
@@ -1094,6 +1098,7 @@ function viewRotation(){
     ${prev.length?`<p class="hint">Earlier weeks</p><div class="card">${prev.map(k=>{
       const pw=weekStats(k);return `<div class="wk"><span class="nm">${fmtLong(k)} – ${fmtLong(addDays(k,6))} · ${esc(pw.list[0].id)}</span>
       <button class="tgl" style="flex:0 0 auto" onclick="openCert('${k}')">Certificate</button></div>`}).join('')}</div>`:''}`})()}
+  ${canManage()?pointsAdmin():''}
   <h2 style="margin-top:28px">Restore</h2>
   <p class="hint">Backups now take themselves — every night, kept for six months — so there is nothing to do here day to day. If something ever needs putting back, ask for the backup file and paste it in below.</p>
   <div class="card">
@@ -1372,6 +1377,36 @@ function sortHat(){
   mix(S.roster.filter(p=>!p.till)).forEach(p=>{p.house=HOUSES[i++%n].id});
   S.roster.sort((a,b)=>a.name.localeCompare(b.name));
   save();render();toast('The hat has spoken',1)})}
+/* Store-manager only. The × in the Award tab covers correcting a slip you
+   just made; this is the whole term, for putting right something older. */
+function pointsAdmin(){
+  const rows=S.entries.slice().reverse().map(e=>{
+    const v=entryPts(e),down=v<0;
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);white-space:nowrap">${fmtDate(e.date)}</td>
+      <td>${crest(house(e.house),14)}${esc(e.name)}${e.reason?'<br><span class="by">'+esc(e.reason)+'</span>':''}<br><span class="by">by ${esc(e.by||'—')}</span></td>
+      <td class="num"${down?' style="color:var(--wax)"':''}>${down?'−'+Math.abs(v):'+'+v}</td>
+      <td style="width:28px"><button class="x" onclick="delEntry('${e.id}')" aria-label="Remove this award">×</button></td></tr>`}).join('');
+  const n=S.entries.length,d=S.days.length;
+  return `<h2 style="margin-top:28px">Every point this term</h2>
+  <p class="hint">${n?n+' award'+(n===1?'':'s')+', newest first. Tap × to take one back — it comes off the house straight away, and there is one Undo.':'Nothing awarded yet this term.'}</p>
+  ${n?`<div class="card"><table>${rows}</table></div>`:''}
+  <h2 style="margin-top:28px">Reset all points</h2>
+  <p class="hint">Empties the hourglasses and starts the scoring again without ending the term — for when the board needs putting right rather than engraving. The team, the houses, the managers and the trophy room all stay.</p>
+  <button class="btn danger" onclick="resetPoints()">Reset all points</button>`}
+function resetPoints(){
+  if(!canManage()){toast('Only the store manager can reset the points');return}
+  const n=S.entries.length,d=S.days.length,svy=S.smgCount||0;
+  if(!n&&!d&&!svy){toast('There are no points to reset');return}
+  askConfirm('Reset ALL points?\n\n'
+    +n+' award'+(n===1?'':'s')+', '+d+' shift'+(d===1?'':'s')+' and the survey count ('+svy+') are removed — for everyone using this board, not just you.\n\n'
+    +'The team, the houses, the managers and the trophy room are all kept, and the term keeps its start date.\n\n'
+    +'There is one Undo, and only until the next change.',()=>{
+    snap();
+    /* tombstone them, or a phone that was offline merges them all back */
+    tomb(S.entries.map(e=>e.id).concat(S.days.map(x=>x.id)));
+    S.entries=[];S.days=[];S.smgCount=0;
+    save();render();toast('All points reset',1)})}
 function restoreBackup(){
   if(!canManage()){toast('Only the store manager can restore the board');return}
   const t=(document.getElementById('bkIn')||{}).value||'';
